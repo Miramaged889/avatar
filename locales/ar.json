@@ -1,0 +1,215 @@
+{
+  "greetings": {
+    "goodEvening": "مساء الخير، المشرف",
+    "goodMorning": "صباح الخير، المشرف",
+    "goodAfternoon": "بعد الظهر الخير، المشرف"
+  },
+  "stats": {
+    "totalCustomers": "إجمالي العملاء",
+    "interactions": "التفاعلات",
+    "activeCustomers": "العملاء النشطون",
+    "new": "جديد"
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "customers": "العملاء",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
+  },
+  "buttons": {
+    "login": "تسجيل الدخول",
+    "addCustomer": "إضافة عملاء",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "cancel": "إلغاء",
+    "viewAll": "عرض جميع العملاء",
+    "uploadData": "رفع البيانات",
+    "browseFile": "تصفح الملف",
+    "remove": "إزالة"
+  },
+  "labels": {
+    "email": "عنوان البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "name": "اسم العميل",
+    "nameEn": "اسم العميل (بالإنجليزية)",
+    "nameAr": "اسم العميل (بالعربية)",
+    "phone": "رقم الهاتف",
+    "phoneOptional": "رقم الهاتف (اختياري)",
+    "package": "الباقة / الخطة",
+    "packageOptional": "الباقة / الخطة (اختياري)",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "devices": "عدد الأجهزة",
+    "avatar": "اختر الصورة الرمزية",
+    "status": "الحالة",
+    "login": "تسجيل الدخول"
+  },
+  "placeholders": {
+    "email": "ادخل عنوان البريد الإلكتروني",
+    "search": "ابحث عن شيء هنا...",
+    "customerName": "أدخل الاسم الكامل للعميل",
+    "customerNameEn": "Enter customer name in English",
+    "customerNameAr": "أدخل اسم العميل بالعربية",
+    "phone": "مثال: (123) 123-1234",
+    "phoneExample": "مثال: 01012345678",
+    "choosePackage": "اختر الباقة",
+    "devices": "0-50",
+    "password": "كلمة المرور"
+  },
+  "table": {
+    "customerName": "اسم العميل",
+    "phoneNumber": "رقم الهاتف",
+    "packagePlan": "الباقة / الخطة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "sortBy": "ترتيب حسب الأحدث",
+    "showing": "عرض البيانات",
+    "to": "إلى",
+    "of": "من",
+    "entries": "إدخال"
+  },
+  "customers": {
+    "pageTitle": "عملائي",
+    "activeMembers": "الأعضاء النشطون",
+    "sortBy": {
+      "newest": "ترتيب حسب: الأحدث",
+      "oldest": "ترتيب حسب: الأقدم",
+      "name": "ترتيب حسب: الاسم"
+    },
+    "pagination": {
+      "showing": "عرض البيانات",
+      "to": "إلى",
+      "of": "من",
+      "entries": "إدخال"
+    },
+    "packages": {
+      "premium": "بريميوم",
+      "basic": "أساسي",
+      "gold": "ذهبي",
+      "custom": "مخصص"
+    },
+    "customerNames": {
+      "janeCooper": "جين كوبر",
+      "floydMiles": "فلويد مايلز",
+      "ronaldRichards": "رونالد ريتشاردز",
+      "marvinMcKinney": "مارفن ماكيني",
+      "jeromeBell": "جيروم بيل",
+      "kathrynMurphy": "كاثرين ميرفي",
+      "jacobJones": "جاكوب جونز",
+      "kristinWatson": "كريستين واتسون"
+    }
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "modals": {
+    "addCustomer": "إضافة عميل جديد",
+    "addCustomerDescription": "املأ المعلومات أدناه لإضافة عميل جديد."
+  },
+  "messages": {
+    "saveSuccess": "تمت إضافة العميل بنجاح!",
+    "loginSuccess": "تم تسجيل الدخول بنجاح!",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "activeMembers": "الأعضاء النشطون",
+    "chooseFileOrDrag": "اختر ملفك أو اسحبه وأفلته هنا",
+    "maxFileSize": "الحد الأقصى لحجم الملف حتى 1 جيجابايت",
+    "noFileChosen": "لم يتم اختيار ملف",
+    "fillRequiredFields": "يرجى ملء جميع الحقول المطلوبة",
+    "devicesRange": "يجب أن يكون عدد الأجهزة بين 0 و 50",
+    "saveFailed": "فشل الحفظ"
+  },
+  "aria": {
+    "languageToggleLabel": "تبديل اللغة بين الإنجليزية والعربية",
+    "languageToggle": "تبديل اللغة",
+    "notifications": "الإشعارات",
+    "profile": "قائمة الملف الشخصي",
+    "search": "بحث"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "dashboard": {
+    "greetingDescription": "إليك بعض التوصيات المخصصة وإحصائيات الحساب لمساعدتك في إنجاز المهام الليلة.",
+    "customers": "العملاء",
+    "customersGrowth": "نمو العملاء",
+    "topMonth": "أفضل شهر",
+    "topYear": "أفضل سنة للتوظيف",
+    "topCustomer": "أفضل عميل",
+    "november": "نوفمبر",
+    "year2019": "2019",
+    "sortBy": {
+      "newest": "ترتيب حسب الأحدث",
+      "oldest": "ترتيب حسب الأقدم",
+      "name": "ترتيب حسب الاسم"
+    },
+    "period": {
+      "yearly": "سنوي",
+      "monthly": "شهري",
+      "weekly": "أسبوعي"
+    }
+  },
+  "sidebar": {
+    "admin": "مشرف"
+  },
+  "topbar": {
+    "logo": "الشعار",
+    "admin": "مشرف",
+    "superAdministrator": "مشرف عام"
+  },
+  "settings": {
+    "pageDescription": "إدارة إعدادات حسابك وتفضيلاتك",
+    "profile": {
+      "title": "معلومات الملف الشخصي",
+      "description": "قم بتحديث معلوماتك الشخصية",
+      "changeAvatar": "تغيير الصورة الرمزية",
+      "avatarHint": "JPG أو PNG أو GIF. الحد الأقصى للحجم 2 ميجابايت",
+      "fullName": "الاسم الكامل",
+      "emailAddress": "عنوان البريد الإلكتروني",
+      "phoneNumber": "رقم الهاتف",
+      "company": "الشركة",
+      "saveChanges": "حفظ التغييرات"
+    },
+    "security": {
+      "title": "الأمان",
+      "description": "إدارة كلمة المرور وإعدادات الأمان",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "twoFactor": "تفعيل المصادقة الثنائية",
+      "updatePassword": "تحديث كلمة المرور"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "description": "إدارة تفضيلات الإشعارات",
+      "emailNotifications": "إشعارات البريد الإلكتروني",
+      "pushNotifications": "الإشعارات الفورية",
+      "smsNotifications": "إشعارات الرسائل النصية",
+      "marketingEmails": "رسائل التسويق",
+      "savePreferences": "حفظ التفضيلات"
+    },
+    "general": {
+      "title": "عام",
+      "description": "إعدادات اللغة",
+      "language": "اللغة",
+      "saveSettings": "حفظ الإعدادات"
+    },
+    "quickActions": {
+      "title": "إجراءات سريعة",
+      "generateApiKey": "إنشاء مفتاح API",
+      "exportData": "تصدير البيانات",
+      "deleteAccount": "حذف الحساب"
+    },
+    "accountStatus": {
+      "title": "حالة الحساب",
+      "status": "الحالة",
+      "active": "نشط",
+      "memberSince": "عضو منذ",
+      "lastLogin": "آخر تسجيل دخول"
+    }
+  }
+}
+

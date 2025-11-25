@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --font-inter: 'Inter', system-ui, sans-serif;
+    --font-cairo: 'Cairo', system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter);
+  }
+  body[dir='rtl'] {
+    font-family: var(--font-cairo);
+  }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* RTL adjustments */
+[dir='rtl'] .text-left {
+  text-align: right;
+}
+
+[dir='rtl'] .text-right {
+  text-align: left;
+}
+
+/* Smooth transitions for locale changes */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Custom gradient backgrounds for stat cards */
+.bg-gradient-stat-1 {
+  background: linear-gradient(65.02deg, #16294E 2.2%, #0464ED 97.07%);
+}
+
+.bg-gradient-stat-2 {
+  background: linear-gradient(65.02deg, rgba(20, 35, 61, 0.65) 2.2%, #112CA3 97.07%);
+}
+
+.bg-gradient-stat-3 {
+  background: linear-gradient(242.81deg, #112CA3 2.68%, #000537 97.74%);
+}
+

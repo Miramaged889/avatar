@@ -1,0 +1,215 @@
+{
+  "greetings": {
+    "goodEvening": "Good Evening, Admin",
+    "goodMorning": "Good Morning, Admin",
+    "goodAfternoon": "Good Afternoon, Admin"
+  },
+  "stats": {
+    "totalCustomers": "Total Customers",
+    "interactions": "Interactions",
+    "activeCustomers": "Active Customers",
+    "new": "New"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "buttons": {
+    "login": "LOGIN",
+    "addCustomer": "Add Customers",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "viewAll": "View All Customers",
+    "uploadData": "Upload Data",
+    "browseFile": "Browse File",
+    "remove": "Remove"
+  },
+  "labels": {
+    "email": "EMAIL ADDRESS",
+    "password": "PASSWORD",
+    "name": "Customer Name",
+    "nameEn": "Customer Name (English)",
+    "nameAr": "Customer Name (Arabic)",
+    "phone": "Phone Number",
+    "phoneOptional": "Phone Number (Optional)",
+    "package": "Package / Plan",
+    "packageOptional": "Package / Plan (Optional)",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "devices": "Number of Devices",
+    "avatar": "Choose the Avatar",
+    "status": "Status",
+    "login": "Login"
+  },
+  "placeholders": {
+    "email": "Enter your email address",
+    "search": "Search something here...",
+    "customerName": "Enter customer full name",
+    "customerNameEn": "Enter customer name in English",
+    "customerNameAr": "Enter customer name in Arabic",
+    "phone": "e.g. (123) 123-1234",
+    "phoneExample": "e.g. 01012345678",
+    "choosePackage": "Choose Package",
+    "devices": "0-50",
+    "password": "Enter your password"
+  },
+  "table": {
+    "customerName": "Customer Name",
+    "phoneNumber": "Phone Number",
+    "packagePlan": "Package / Plan",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "actions": "Actions",
+    "sortBy": "Sort by Newest",
+    "showing": "Showing data",
+    "to": "to",
+    "of": "of",
+    "entries": "entries"
+  },
+  "customers": {
+    "pageTitle": "My Customers",
+    "activeMembers": "Active Members",
+    "sortBy": {
+      "newest": "Sort by: Newest",
+      "oldest": "Sort by: Oldest",
+      "name": "Sort by: Name"
+    },
+    "pagination": {
+      "showing": "Showing data",
+      "to": "to",
+      "of": "of",
+      "entries": "entries"
+    },
+    "packages": {
+      "premium": "Premium",
+      "basic": "Basic",
+      "gold": "Gold",
+      "custom": "Custom"
+    },
+    "customerNames": {
+      "janeCooper": "Jane Cooper",
+      "floydMiles": "Floyd Miles",
+      "ronaldRichards": "Ronald Richards",
+      "marvinMcKinney": "Marvin McKinney",
+      "jeromeBell": "Jerome Bell",
+      "kathrynMurphy": "Kathryn Murphy",
+      "jacobJones": "Jacob Jones",
+      "kristinWatson": "Kristin Watson"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "modals": {
+    "addCustomer": "Add New Customer",
+    "addCustomerDescription": "Fill the information below to add a new customer."
+  },
+  "messages": {
+    "saveSuccess": "Customer added successfully!",
+    "loginSuccess": "Logged in successfully!",
+    "forgotPassword": "Forgot your password?",
+    "activeMembers": "Active Members",
+    "chooseFileOrDrag": "Choose your file or drag and drop here",
+    "maxFileSize": "Max file size up to 1 GB",
+    "noFileChosen": "No file chosen",
+    "fillRequiredFields": "Please fill in all required fields",
+    "devicesRange": "Number of devices must be between 0 and 50",
+    "saveFailed": "Save failed"
+  },
+  "aria": {
+    "languageToggleLabel": "Toggle language between English and Arabic",
+    "languageToggle": "Language Toggle",
+    "notifications": "Notifications",
+    "profile": "Profile menu",
+    "search": "Search"
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "dashboard": {
+    "greetingDescription": "Here are some custom recommendations and account stats to help you get things done tonight.",
+    "customers": "Customers",
+    "customersGrowth": "Customers Growth",
+    "topMonth": "Top month",
+    "topYear": "Top year of Hiring",
+    "topCustomer": "Top Customer",
+    "november": "November",
+    "year2019": "2019",
+    "sortBy": {
+      "newest": "Sort by Newest",
+      "oldest": "Sort by Oldest",
+      "name": "Sort by Name"
+    },
+    "period": {
+      "yearly": "Yearly",
+      "monthly": "Monthly",
+      "weekly": "Weekly"
+    }
+  },
+  "sidebar": {
+    "admin": "Admin"
+  },
+  "topbar": {
+    "logo": "Logo",
+    "admin": "Admin",
+    "superAdministrator": "Super Administrator"
+  },
+  "settings": {
+    "pageDescription": "Manage your account settings and preferences",
+    "profile": {
+      "title": "Profile Information",
+      "description": "Update your personal information",
+      "changeAvatar": "Change Avatar",
+      "avatarHint": "JPG, PNG or GIF. Max size 2MB",
+      "fullName": "Full Name",
+      "emailAddress": "Email Address",
+      "phoneNumber": "Phone Number",
+      "company": "Company",
+      "saveChanges": "Save Changes"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Manage your password and security settings",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "twoFactor": "Enable Two-Factor Authentication",
+      "updatePassword": "Update Password"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage your notification preferences",
+      "emailNotifications": "Email Notifications",
+      "pushNotifications": "Push Notifications",
+      "smsNotifications": "SMS Notifications",
+      "marketingEmails": "Marketing Emails",
+      "savePreferences": "Save Preferences"
+    },
+    "general": {
+      "title": "General",
+      "description": "Language settings",
+      "language": "Language",
+      "saveSettings": "Save Settings"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "generateApiKey": "Generate API Key",
+      "exportData": "Export Data",
+      "deleteAccount": "Delete Account"
+    },
+    "accountStatus": {
+      "title": "Account Status",
+      "status": "Status",
+      "active": "Active",
+      "memberSince": "Member Since",
+      "lastLogin": "Last Login"
+    }
+  }
+}
+
