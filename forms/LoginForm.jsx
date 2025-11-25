@@ -30,6 +30,11 @@ export function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
+      className={cn(
+        "bg-white rounded-2xl flex flex-col gap-6", // white background & card effect
+        "w-full max-w-[531px] md:px-10 md:py-10 px-4 py-8",    // responsive padding
+        "mx-auto",
+      )}
       style={{
         width: "531px",
         height: "583px",
@@ -41,9 +46,12 @@ export function LoginForm() {
     >
       {/* LOGIN Heading */}
       <div>
-        <p className=" font-bold text-primary-dark"
-        style={{ fontSize: "72px" }}
-        >{t("labels.login")}</p>
+        <p
+          className=" font-bold text-primary-dark"
+          style={{ fontSize: "72px" }}
+        >
+          {t("labels.login")}
+        </p>
       </div>
 
       {/* Email Field */}

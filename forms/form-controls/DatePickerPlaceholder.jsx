@@ -59,17 +59,17 @@ export function DatePickerPlaceholder({
 
       <input
         id={inputId}
-        name={name}
-        type="date"
+          name={name}
+          type="date"
         value={dateValue}
         onChange={handleChange}
-        required={required}
+          required={required}
         className={cn(
           "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 text-left",
           "focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT focus:border-transparent"
         )}
-        {...props}
-      />
+          {...props}
+        />
     </div>
   );
 }

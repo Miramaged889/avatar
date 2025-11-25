@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Search, Bell, ChevronDown, Menu } from "lucide-react";
 import { useLocale } from "../utils/useLocale";
 import { cn } from "../utils/cn";
 
-export function Topbar() {
+export function Topbar({ onMenuClick }) {
   const { locale, setLocale, t, isRTL } = useLocale();
   const [mounted, setMounted] = useState(false);
 
@@ -22,19 +22,31 @@ export function Topbar() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 flex h-16 items-center gap-4  bg-primary-dark px-6 shadow-sm w-full">
+    <header className="fixed top-0 left-0 right-0 z-30 flex h-16 items-center gap-4  bg-primary-dark px-4 sm:px-6 shadow-sm w-full">
       <div className="flex flex-1 items-center gap-4 justify-between w-full">
+        {/* Hamburger Menu Button for Mobile */}
+        <button
+          onClick={onMenuClick}
+          className={cn(
+            "md:hidden rounded-lg p-2 text-gray-300 hover:bg-primary-light hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-accent focus:ring-offset-2",
+            isRTL && "order-last"
+          )}
+          aria-label={t("aria.openSidebar") || "Open sidebar"}
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+
         {/* Logo */}
         <h1
           className={cn(
-            "text-2xl font-bold text-accent-yellow",
+            "text-xl sm:text-2xl font-bold text-accent-yellow",
             isRTL ? "text-right" : "text-left"
           )}
         >
           {t("topbar.logo")}
         </h1>
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
+        {/* Search - Hide on mobile, show on tablet and up */}
+        <div className="relative hidden md:flex flex-1 max-w-md">
           <Search
             className={cn(
               "absolute top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400",

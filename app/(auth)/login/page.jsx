@@ -22,9 +22,23 @@ export default function LoginPage() {
   const backgroundImage = isRTL ? "/Vector-right.png" : "/Vector.png";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white">
-      {/* Background Image Section - Full Screen */}
-      <div className="fixed inset-0 w-full h-full z-0">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Mobile Background Image - Desktop-6.png */}
+      <div className="md:hidden fixed inset-0 w-full h-full z-0">
+        <Image
+          src="/Desktop-6.png"
+          alt="Background"
+          fill
+          className="object-cover"
+          priority
+          style={{ objectPosition: "center" }}
+          sizes="100vw"
+          unoptimized
+        />
+      </div>
+
+      {/* Desktop Background Image Section */}
+      <div className="hidden md:block fixed inset-0 w-full h-full z-0">
         <div className="relative w-full h-full">
           {/* Logo - top left for LTR, top right for RTL */}
           <div
@@ -48,14 +62,17 @@ export default function LoginPage() {
           />
         </div>
       </div>
-      {/* Login Form Section - Positioned according to language */}
-      <div className="relative z-20">
+      {/* Login Form Section - Responsive positioning */}
+      <div className="relative z-20 min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-20">
         <div
-          style={{
-            position: "absolute",
-            top: "305px",
-            ...(isRTL ? { right: "88px" } : { left: "88px" }),
-          }}
+          className={cn(
+            "w-full flex justify-center items-center", // center on small screens
+            "md:block md:w-auto",
+            "md:absolute md:top-[305px]",
+            isRTL
+              ? "md:right-[88px] md:left-auto"
+              : "md:left-[88px] md:right-auto"
+          )}
         >
           <LoginForm />
         </div>
