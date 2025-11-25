@@ -41,7 +41,9 @@ export function LoginForm() {
     >
       {/* LOGIN Heading */}
       <div>
-        <p className="text-7xl font-bold text-primary-dark">{t("labels.login")}</p>
+        <p className=" font-bold text-primary-dark"
+        style={{ fontSize: "72px" }}
+        >{t("labels.login")}</p>
       </div>
 
       {/* Email Field */}
