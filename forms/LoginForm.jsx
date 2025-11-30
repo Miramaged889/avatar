@@ -65,7 +65,7 @@ export function LoginForm() {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-white rounded-2xl flex flex-col gap-6", // white background & card effect
+        " rounded-2xl flex flex-col gap-6", // white background & card effect
         "w-full max-w-[531px] md:px-10 md:py-10 px-4 py-8", // responsive padding
         "mx-auto"
       )}

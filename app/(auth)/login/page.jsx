@@ -68,7 +68,7 @@ export default function LoginPage() {
           className={cn(
             "w-full flex justify-center items-center", // center on small screens
             "md:block md:w-auto",
-            "md:absolute md:top-[305px]",
+            "md:absolute md:top-[250px]",
             isRTL
               ? "md:right-[88px] md:left-auto"
               : "md:left-[88px] md:right-auto"
