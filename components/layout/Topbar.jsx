@@ -65,14 +65,6 @@ export function Topbar({ onMenuClick }) {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Notifications */}
-          <button
-            className="relative rounded-lg p-2 text-gray-300 hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary-accent focus:ring-offset-2"
-            aria-label={t("aria.notifications")}
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-          </button>
 
           {/* Profile */}
           <div

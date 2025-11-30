@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { CustomersTable } from "../../../components/tables/CustomersTable";
-import { AddCustomerModal } from "../../../components/modals/AddCustomerModal";
+import { useState, useEffect } from "react";
+import { BusinessTable } from "../../../components/tables/BusinessTable";
+import { AddBusinessModal } from "../../../components/modals/business/AddBusinessModal";
+import { ViewBusinessModal } from "../../../components/modals/business/ViewBusinessModal";
 import { Button } from "../../../components/shadcn/ButtonWrapper";
 import {
   Select,
@@ -14,14 +15,49 @@ import {
 import { Plus } from "lucide-react";
 import { useLocale } from "../../../components/utils/useLocale";
 import { cn } from "../../../components/utils/cn";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAllBusinesses,
+  fetchBusinessDetails,
+} from "../../../lib/store/slices/businessSlice";
 
-export default function CustomersPage() {
+export default function BusinessPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedBusinessId, setSelectedBusinessId] = useState(null);
+  const [viewingBusinessId, setViewingBusinessId] = useState(null);
   const { t, formatNumber, isRTL } = useLocale();
+  const dispatch = useDispatch();
+  const { businesses, loading, error } = useSelector((state) => state.business);
+
+  // Fetch businesses on component mount
+  useEffect(() => {
+    dispatch(fetchAllBusinesses());
+  }, [dispatch]);
 
   const handleAddSuccess = (data) => {
-    console.log("Customer added:", data);
-    // Refresh table or update state
+    dispatch(fetchAllBusinesses());
+  };
+
+  const handleEdit = (businessId) => {
+    setSelectedBusinessId(businessId);
+    setIsModalOpen(true);
+  };
+
+  const handleView = (businessId) => {
+    setViewingBusinessId(businessId);
+    dispatch(fetchBusinessDetails(businessId));
+    setIsViewModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedBusinessId(null);
+  };
+
+  const handleViewModalClose = () => {
+    setIsViewModalOpen(false);
+    setViewingBusinessId(null);
   };
 
   return (
@@ -35,10 +71,10 @@ export default function CustomersPage() {
       >
         <div className={cn(isRTL && "text-left")}>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            {t("customers.pageTitle")}
+            {t("business.pageTitle") || "Business"}
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            {t("customers.activeMembers")}
+            {t("business.activeMembers") || "Active businesses"}
           </p>
         </div>
         <div
@@ -49,38 +85,64 @@ export default function CustomersPage() {
         >
           <Select defaultValue="newest">
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder={t("customers.sortBy.newest")} />
+              <SelectValue
+                placeholder={t("business.sortBy.newest") || "Newest"}
+              />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="newest">
-                {t("customers.sortBy.newest")}
+                {t("business.sortBy.newest") || "Newest"}
               </SelectItem>
               <SelectItem value="oldest">
-                {t("customers.sortBy.oldest")}
+                {t("business.sortBy.oldest") || "Oldest"}
               </SelectItem>
               <SelectItem value="name">
-                {t("customers.sortBy.name")}
+                {t("business.sortBy.name") || "Name"}
               </SelectItem>
             </SelectContent>
           </Select>
 
           <Button
             variant="dark"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setSelectedBusinessId(null);
+              setIsModalOpen(true);
+            }}
             className="flex items-center justify-center gap-2 px-3 rounded-md py-2 text-sm sm:text-base h-10 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-            {t("buttons.addCustomer")}
+            {t("buttons.addBusiness") || "Add Business"}
           </Button>
         </div>
       </div>
 
-      {/* Table - Scrollable on mobile */}
-      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-        <div className="min-w-[600px] sm:min-w-full">
-          <CustomersTable />
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {typeof error === "string" ? error : "An error occurred"}
         </div>
-      </div>
+      )}
+
+      {/* Loading State */}
+      {loading && !businesses.length && (
+        <div className="text-center py-8 text-gray-500">
+          {t("messages.loading") || "Loading..."}
+        </div>
+      )}
+
+      {/* Table - Scrollable on mobile */}
+      {!loading && (
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="min-w-[600px] sm:min-w-full">
+            <BusinessTable
+              businesses={businesses}
+              onEdit={handleEdit}
+              onView={handleView}
+              loading={loading}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       <div
@@ -95,9 +157,11 @@ export default function CustomersPage() {
             isRTL && "sm:text-right"
           )}
         >
-          {t("customers.pagination.showing")} 1 {t("customers.pagination.to")}{" "}
-          8 {t("customers.pagination.of")} 256K{" "}
-          {t("customers.pagination.entries")}
+          {t("business.pagination.showing") || "Showing"} 1{" "}
+          {t("business.pagination.to") || "to"}{" "}
+          {businesses.length > 8 ? 8 : businesses.length}{" "}
+          {t("business.pagination.of") || "of"} {businesses.length}{" "}
+          {t("business.pagination.entries") || "entries"}
         </p>
         <div
           className={cn(
@@ -144,11 +208,19 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Add Customer Modal */}
-      <AddCustomerModal
+      {/* Add/Edit Business Modal */}
+      <AddBusinessModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={handleModalClose}
         onSuccess={handleAddSuccess}
+        businessId={selectedBusinessId}
+      />
+
+      {/* View Business Modal */}
+      <ViewBusinessModal
+        open={isViewModalOpen}
+        onOpenChange={handleViewModalClose}
+        businessId={viewingBusinessId}
       />
     </div>
   );

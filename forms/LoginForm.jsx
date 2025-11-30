@@ -7,24 +7,58 @@ import { useLocale } from "../components/utils/useLocale";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "../components/utils/cn";
+import { superuserLogin } from "../lib/api/authApi";
+import { setAuthTokens } from "../lib/api/axios";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   const { t, isRTL } = useLocale();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
 
-    // Simulate login
-    setTimeout(() => {
+    try {
+      // Call superuser login API
+      const result = await superuserLogin(username, password);
+
+      if (result.success) {
+        // Save tokens to localStorage
+        const { access, refresh } = result.data;
+        setAuthTokens(access, refresh);
+
+        // Redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        // Handle error
+        const errorMessage =
+          result.error?.detail ||
+          result.error?.message ||
+          result.error ||
+          t("messages.loginFailed") ||
+          "Login failed. Please check your credentials.";
+        setError(
+          typeof errorMessage === "string"
+            ? errorMessage
+            : JSON.stringify(errorMessage)
+        );
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(
+        err?.message ||
+          t("messages.loginFailed") ||
+          "An error occurred during login"
+      );
+    } finally {
       setIsLoading(false);
-      router.push("/dashboard");
-    }, 1000);
+    }
   };
 
   return (
@@ -32,8 +66,8 @@ export function LoginForm() {
       onSubmit={handleSubmit}
       className={cn(
         "bg-white rounded-2xl flex flex-col gap-6", // white background & card effect
-        "w-full max-w-[531px] md:px-10 md:py-10 px-4 py-8",    // responsive padding
-        "mx-auto",
+        "w-full max-w-[531px] md:px-10 md:py-10 px-4 py-8", // responsive padding
+        "mx-auto"
       )}
       style={{
         width: "531px",
@@ -54,22 +88,29 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* Email Field */}
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Username Field */}
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
         <label
-          htmlFor="email"
+          htmlFor="username"
           className="block text-xl font-medium text-gray-900 uppercase tracking-wide"
         >
-          {t("labels.email")}
+          {t("labels.username") || "Username"}
         </label>
         <div className="relative">
           <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder={t("placeholders.email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="username"
+            name="username"
+            type="text"
+            placeholder={t("placeholders.username") || "Enter your username"}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             className="w-full bg-transparent  px-0 py-2 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-dark transition-colors"
             style={{ borderBottom: "2px solid #000537", borderRadius: "0px" }}

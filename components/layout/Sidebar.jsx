@@ -2,14 +2,29 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Eye, Settings, LogOut, Globe, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  Eye,
+  Settings,
+  LogOut,
+  Globe,
+  X,
+  Users,
+  BookOpen,
+  CreditCard,
+  Shield,
+} from "lucide-react";
 import { useLocale } from "../utils/useLocale";
 import { cn } from "../utils/cn";
 import { useEffect } from "react";
 
 const navigation = [
   { name: "navigation.dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "navigation.customers", href: "/customers", icon: Eye },
+  { name: "navigation.business", href: "/business", icon: Eye },
+  { name: "navigation.clients", href: "/clients", icon: Users },
+  { name: "navigation.knowledge", href: "/knowledge", icon: BookOpen },
+  { name: "navigation.payments", href: "/payments", icon: CreditCard },
+  { name: "navigation.admins", href: "/admins", icon: Shield },
   { name: "navigation.settings", href: "/settings", icon: Settings },
   { name: "navigation.logout", href: "/logout", icon: LogOut },
 ];
@@ -123,52 +138,59 @@ export function Sidebar({ isOpen, setIsOpen }) {
             })}
           </nav>
 
-          {/* Language Toggle */}
-          <div className="border-t border-primary-light p-4">
+          {/* Language Toggle (Improved UI) */}
+          <div className="border-t border-primary-light px-4 py-4">
             <button
               onClick={toggleLanguage}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors rounded-lg mx-2",
-                "text-gray-300 hover:bg-primary-light hover:text-white",
-                isRTL && "flex-row-reverse"
+                "w-full flex items-center gap-2 px-3 py-2 rounded-xl transition-all",
+                "bg-primary-light/40 hover:bg-primary-light/70",
+                "text-white group shadow-sm",
+                isRTL && "flex-row"
               )}
               aria-label={t("aria.languageToggle")}
               title={t("aria.languageToggle")}
+              style={{ minHeight: 48 }}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-light">
-                <Globe className="h-4 w-4 text-white" />
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary-dark shadow transition-all group-hover:bg-accent-yellow">
+                <Globe className="h-5 w-5 text-white group-hover:text-primary-dark" />
               </div>
               <div
-                className="flex-1 text-left"
-                style={isRTL ? { textAlign: "right" } : { textAlign: "left" }}
+                className={cn(
+                  "flex-1 flex flex-col justify-center",
+                  isRTL ? "items-start text-left" : "items-start text-left"
+                )}
               >
-                <p className="text-sm font-medium text-white">
+                <span className="text-base font-semibold text-white">
                   {locale === "en" ? "English" : "العربية"}
-                </p>
-                <p className="text-xs text-gray-400">
+                </span>
+                <span className="text-xs text-gray-200 group-hover:text-white transition-colors">
                   {locale === "en"
                     ? "Switch to Arabic"
                     : "التبديل إلى الإنجليزية"}
-                </p>
+                </span>
               </div>
             </button>
           </div>
 
-          {/* Admin Section */}
-          <div className="border-t border-primary-light p-4">
+          {/* Admin Section (Improved UI) */}
+          <div className="border-t border-primary-light px-4 py-4">
             <div
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3",
-                isRTL && "flex-row"
+                "flex items-center gap-3 rounded-xl bg-primary-light/40 px-3 py-2",
+                isRTL ? "flex-row" : "flex-row"
               )}
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500 text-white text-xs font-semibold">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 shadow text-white text-base font-bold border-2 border-white">
                 {locale === "ar" ? "م" : "A"}
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-white">
+              <div className={cn("flex-1", isRTL ? "text-left" : "text-left")}>
+                <span className="text-base font-semibold text-white">
                   {t("sidebar.admin")}
-                </p>
+                </span>
+                <div className="text-xs text-gray-200 group-hover:text-white transition-colors">
+                  {t("navigation.adminRole") || "Administrator"}
+                </div>
               </div>
             </div>
           </div>

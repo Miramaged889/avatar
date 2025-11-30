@@ -1,4 +1,5 @@
 import "./globals.css";
+import StoreProvider from "../lib/StoreProvider";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -9,7 +10,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

@@ -1,3 +1,34 @@
-{
+xhr.js:198  PATCH https://avatar-backend-gdv6e.ondigitalocean.app/api/dashboard/clients/2/ 400 (Bad Request)
+dispatchXhrRequest @ xhr.js:198
+xhr @ xhr.js:15
+dispatchRequest @ dispatchRequest.js:51
+Promise.then
+_request @ Axios.js:163
+request @ Axios.js:40
+httpMethod @ Axios.js:224
+wrap @ bind.js:12
+updateClient @ clientApi.js:70
+eval @ clientSlice.js:55
+eval @ redux-toolkit.modern.mjs:944
+eval @ redux-toolkit.modern.mjs:978
+eval @ redux-thunk.mjs:5
+eval @ redux-toolkit.modern.mjs:290
+eval @ redux-toolkit.modern.mjs:110
+handleSubmit @ AddClientForm.jsx:134
+callCallback @ react-dom.development.js:20565
+invokeGuardedCallbackImpl @ react-dom.development.js:20614
+invokeGuardedCallback @ react-dom.development.js:20689
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:20703
+executeDispatch @ react-dom.development.js:32128
+processDispatchQueueItemsInOrder @ react-dom.development.js:32160
+processDispatchQueue @ react-dom.development.js:32173
+dispatchEventsForPlugins @ react-dom.development.js:32184
+eval @ react-dom.development.js:32374
+batchedUpdates$1 @ react-dom.development.js:24953
+batchedUpdates @ react-dom.development.js:28844
+dispatchEventForPluginEventSystem @ react-dom.development.js:32373
+dispatchEvent @ react-dom.development.js:30141
+dispatchDiscreteEvent @ react-dom.development.js:30112
+app-index.tsx:25 Error saving client: {business_id: 'Client cannot move to a different business.'}{
   "workbench.colorTheme": "Cursor Dark"
 }
