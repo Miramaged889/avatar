@@ -42,6 +42,7 @@
     "addClient": "إضافة عميل",
     "addKnowledgeBase": "إضافة قاعدة معرفة",
     "addPayment": "إضافة دفعة",
+    "addAnotherPayment": "إضافة دفعة أخرى",
     "addAdmin": "إضافة مشرف",
     "next": "التالي",
     "previous": "السابق",
@@ -69,6 +70,7 @@
     "address": "العنوان",
     "category": "الفئة",
     "maxAdmins": "الحد الأقصى للمشرفين",
+    "remaining": "المتبقي",
     "uploadFiles": "رفع الملفات",
     "optional": "اختياري",
     "yes": "نعم",
@@ -146,6 +148,7 @@
     "status": "الحالة",
     "actions": "الإجراءات",
     "fullName": "الاسم الكامل",
+    "isActive": "الحالة",
     "sortBy": "ترتيب حسب الأحدث",
     "showing": "عرض البيانات",
     "to": "إلى",
@@ -209,7 +212,19 @@
     },
     "basicInfo": "المعلومات الأساسية",
     "payments": "المدفوعات",
-    "clients": "العملاء"
+    "clients": "العملاء",
+    "admins": "المشرفون",
+    "step1Title": "معلومات العمل",
+    "step2Title": "إضافة عملاء",
+    "step3Title": "إضافة مشرفين",
+    "step2Description": "إضافة عملاء لهذا العمل (اختياري)",
+    "step3Description": "إضافة مشرفين لهذا العمل (اختياري)",
+    "step4Title": "إضافة مدفوعات",
+    "step4Description": "إضافة مدفوعات لهذا العمل (اختياري)",
+    "client": "عميل",
+    "admin": "مشرف",
+    "businessIdInfo": "معرف العمل: {{id}} - سيتم إضافة العناصر إلى هذا العمل",
+    "paymentBusinessIdWarning": "سيتم ربط جميع المدفوعات بالعمل الذي تم إنشاؤه في الخطوة 1"
   },
   "clients": {
     "pageTitle": "العملاء",
@@ -263,7 +278,8 @@
     "amountPaid": "المبلغ المدفوع",
     "method": "طريقة الدفع",
     "date": "تاريخ الدفع",
-    "note": "ملاحظة"
+    "note": "ملاحظة",
+    "payment": "دفعة"
   },
   "status": {
     "active": "نشط",
@@ -311,6 +327,8 @@
     "saveFailed": "فشل الحفظ",
     "loading": "جاري التحميل...",
     "noBusinesses": "لم يتم العثور على أعمال",
+    "businessNotCreated": "يجب إنشاء العمل أولاً",
+    "businessIdNotFound": "لم يتم العثور على معرف العمل في الاستجابة. يرجى التحقق من وحدة التحكم للتفاصيل.",
     "noClients": "لم يتم العثور على عملاء",
     "clientNotFound": "لم يتم العثور على العميل",
     "businessCannotChange": "لا يمكن تغيير العمل للعملاء الموجودين",
@@ -327,11 +345,15 @@
     "confirmDeleteAnswer": "هل أنت متأكد من حذف هذه الإجابة؟",
     "deleteFailed": "فشل الحذف. يرجى المحاولة مرة أخرى.",
     "noPayments": "لم يتم العثور على مدفوعات",
+    "noPaymentsForBusiness": "لم يتم العثور على مدفوعات لهذا العمل",
     "confirmDeletePayment": "هل أنت متأكد من حذف هذه الدفعة؟",
     "confirmDeleteAdmin": "هل أنت متأكد من حذف هذا المشرف؟",
     "noAdmins": "لم يتم العثور على مشرفين",
     "maxAdminsReached": "تم الوصول إلى الحد الأقصى لعدد المشرفين ({{max}}) لهذا العمل.",
+    "maxAdminsReachedTitle": "تم الوصول إلى الحد الأقصى للمشرفين",
+    "maxAdminsReachedDetails": "لقد وصلت إلى حد {{max}} مشرف. العدد الحالي: {{current}}/{{max}}",
     "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "maxReached": "تم الوصول إلى الحد الأقصى",
     "businessNotFound": "لم يتم العثور على العمل",
     "businessRequired": "معلومات العمل مفقودة. يرجى تحديث الصفحة والمحاولة مرة أخرى."
   },
@@ -353,6 +375,10 @@
     "deletePayment": "حذف الدفعة",
     "editAdmin": "تعديل المشرف",
     "deleteAdmin": "حذف المشرف",
+    "editPayment": "تعديل دفعة",
+    "deletePayment": "حذف دفعة",
+    "editPaymentAria": "تعديل دفعة",
+    "deletePaymentAria": "حذف دفعة",
     "viewDocument": "عرض الوثيقة",
     "downloadDocument": "تنزيل الوثيقة",
     "previousPage": "الصفحة السابقة",
@@ -447,7 +473,9 @@
   "admin": {
     "pageTitle": "إدارة المشرفين",
     "description": "عرض وإدارة المشرفين",
-    "maxAdminsInfo": "الحد الأقصى للمشرفين: {{max}}، المتبقي: {{remaining}}",
+    "maxAdminsInfo": "الحد الأقصى: {{max}} مشرف | الحالي: {{current}} | المتبقي: {{remaining}}",
+    "adminsLimitInfo": "حد المشرفين: {{current}}/{{max}} ({{remaining}} متبقي)",
+    "maxAdminsLimit": "الحد: {{max}} | المتبقي: {{remaining}}",
     "allBusinesses": "جميع الأعمال"
   }
 }

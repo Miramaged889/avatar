@@ -4,13 +4,16 @@ import { useState, useEffect } from "react";
 import { TextInput } from "./form-controls/TextInput";
 import { SelectInput } from "./form-controls/SelectInput";
 import { Button } from "../components/shadcn/ButtonWrapper";
-import { X } from "lucide-react";
+import { X, AlertCircle, Users } from "lucide-react";
 import { useLocale } from "../components/utils/useLocale";
 import { useDispatch, useSelector } from "react-redux";
 import { addAdmin, fetchAllAdmins } from "../lib/store/slices/adminSlice";
-import { fetchAllBusinesses, fetchBusinessDetails } from "../lib/store/slices/businessSlice";
+import {
+  fetchAllBusinesses,
+  fetchBusinessDetails,
+} from "../lib/store/slices/businessSlice";
 
-export function AddAdminForm({ onSuccess, onCancel }) {
+export function AddAdminForm({ onSuccess, onCancel, businessId = null }) {
   const { t, isRTL, locale } = useLocale();
   const dispatch = useDispatch();
   const { loading: adminLoading, admins } = useSelector((state) => state.admin);
@@ -20,7 +23,7 @@ export function AddAdminForm({ onSuccess, onCancel }) {
   const { currentBusiness } = useSelector((state) => state.business);
 
   const [formData, setFormData] = useState({
-    business_id: "",
+    business_id: businessId ? String(businessId) : "",
     full_name: "",
     email: "",
     password: "",
@@ -36,6 +39,16 @@ export function AddAdminForm({ onSuccess, onCancel }) {
     }
   }, [dispatch, businesses.length]);
 
+  // Set business_id if provided (always update when businessId changes)
+  useEffect(() => {
+    if (businessId) {
+      setFormData((prev) => ({
+        ...prev,
+        business_id: String(businessId),
+      }));
+    }
+  }, [businessId]);
+
   // Fetch business details and admins when business is selected to get max_admins
   useEffect(() => {
     if (formData.business_id) {
@@ -47,7 +60,10 @@ export function AddAdminForm({ onSuccess, onCancel }) {
 
   // Update max_admins when business details are loaded
   useEffect(() => {
-    if (currentBusiness && currentBusiness.id === Number(formData.business_id)) {
+    if (
+      currentBusiness &&
+      currentBusiness.id === Number(formData.business_id)
+    ) {
       setMaxAdmins(currentBusiness.max_admins || null);
     }
   }, [currentBusiness, formData.business_id]);
@@ -82,7 +98,12 @@ export function AddAdminForm({ onSuccess, onCancel }) {
     setIsSubmitting(true);
 
     // Basic validation
-    if (!formData.business_id || !formData.full_name || !formData.email || !formData.password) {
+    if (
+      !formData.business_id ||
+      !formData.full_name ||
+      !formData.email ||
+      !formData.password
+    ) {
       alert(
         t("messages.fillRequiredFields") || "Please fill all required fields"
       );
@@ -100,17 +121,16 @@ export function AddAdminForm({ onSuccess, onCancel }) {
 
     // Password validation
     if (formData.password.length < 6) {
-      alert(t("messages.passwordMinLength") || "Password must be at least 6 characters");
+      alert(
+        t("messages.passwordMinLength") ||
+          "Password must be at least 6 characters"
+      );
       setIsSubmitting(false);
       return;
     }
 
     // Check max_admins limit
     if (maxAdmins !== null && currentAdminsCount >= maxAdmins) {
-      alert(
-        t("messages.maxAdminsReached", { max: maxAdmins }) ||
-          `Maximum number of admins (${maxAdmins}) has been reached for this business.`
-      );
       setIsSubmitting(false);
       return;
     }
@@ -130,28 +150,29 @@ export function AddAdminForm({ onSuccess, onCancel }) {
       }
     } catch (err) {
       console.error("Error creating admin:", err);
-      
+
       // Handle API validation errors
       let errorMessage = t("messages.saveFailed") || "Failed to create admin";
-      
+
       if (err?.business) {
-        errorMessage = Array.isArray(err.business) 
-          ? `Business: ${err.business.join(", ")}` 
+        errorMessage = Array.isArray(err.business)
+          ? `Business: ${err.business.join(", ")}`
           : `Business: ${err.business}`;
       } else if (err?.password) {
-        errorMessage = Array.isArray(err.password) 
-          ? `Password: ${err.password.join(", ")}` 
+        errorMessage = Array.isArray(err.password)
+          ? `Password: ${err.password.join(", ")}`
           : `Password: ${err.password}`;
       } else if (err?.detail) {
-        errorMessage = typeof err.detail === "string" 
-          ? err.detail 
-          : Array.isArray(err.detail) 
-            ? err.detail.join(", ") 
+        errorMessage =
+          typeof err.detail === "string"
+            ? err.detail
+            : Array.isArray(err.detail)
+            ? err.detail.join(", ")
             : JSON.stringify(err.detail);
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -160,7 +181,8 @@ export function AddAdminForm({ onSuccess, onCancel }) {
 
   // Check if we can add more admins
   const canAddAdmin = maxAdmins === null || currentAdminsCount < maxAdmins;
-  const remainingAdmins = maxAdmins !== null ? maxAdmins - currentAdminsCount : null;
+  const remainingAdmins =
+    maxAdmins !== null ? maxAdmins - currentAdminsCount : null;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -176,10 +198,17 @@ export function AddAdminForm({ onSuccess, onCancel }) {
                 "Fill the information below to add a new admin"}
             </p>
             {maxAdmins !== null && (
-              <p className="text-xs text-gray-600 mt-2">
-                {t("admin.maxAdminsInfo", { max: maxAdmins, remaining: remainingAdmins }) ||
-                  `Max admins: ${maxAdmins}, Remaining: ${remainingAdmins}`}
-              </p>
+              <div className="mt-3 flex items-center gap-2 text-sm">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-gray-600">
+                  {t("admin.maxAdminsInfo", {
+                    max: maxAdmins,
+                    current: currentAdminsCount,
+                    remaining: remainingAdmins,
+                  }) ||
+                    `Maximum: ${maxAdmins} admins | Current: ${currentAdminsCount} | Remaining: ${remainingAdmins}`}
+                </span>
+              </div>
             )}
           </div>
           {onCancel && (
@@ -209,7 +238,7 @@ export function AddAdminForm({ onSuccess, onCancel }) {
           value={formData.business_id ? String(formData.business_id) : ""}
           onChange={(value) => handleChange("business_id", value)}
           required
-          disabled={businessesLoading}
+          disabled={businessesLoading || !!businessId}
         />
 
         {/* Full Name */}
@@ -247,9 +276,44 @@ export function AddAdminForm({ onSuccess, onCancel }) {
 
         {/* Warning if max admins reached */}
         {maxAdmins !== null && !canAddAdmin && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
-            {t("messages.maxAdminsReached", { max: maxAdmins }) ||
-              `Maximum number of admins (${maxAdmins}) has been reached for this business.`}
+          <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold text-red-800 mb-1">
+                  {t("messages.maxAdminsReachedTitle") ||
+                    "Maximum Admins Reached"}
+                </h4>
+                <p className="text-sm text-red-700">
+                  {t("messages.maxAdminsReached", { max: maxAdmins }) ||
+                    `Maximum number of admins (${maxAdmins}) has been reached for this business.`}
+                </p>
+                <div className="mt-2 text-xs text-red-600">
+                  {t("messages.maxAdminsReachedDetails", {
+                    max: maxAdmins,
+                    current: currentAdminsCount,
+                  }) ||
+                    `You have reached the limit of ${maxAdmins} admins. Current count: ${currentAdminsCount}/${maxAdmins}`}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info card showing max admins limit */}
+        {maxAdmins !== null && canAddAdmin && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-sm text-blue-800">
+              <Users className="h-4 w-4" />
+              <span>
+                {t("admin.adminsLimitInfo", {
+                  max: maxAdmins,
+                  current: currentAdminsCount,
+                  remaining: remainingAdmins,
+                }) ||
+                  `Admin Limit: ${currentAdminsCount}/${maxAdmins} (${remainingAdmins} remaining)`}
+              </span>
+            </div>
           </div>
         )}
 
@@ -270,7 +334,9 @@ export function AddAdminForm({ onSuccess, onCancel }) {
             type="submit"
             variant="dark"
             className="flex-1 font-medium py-3"
-            disabled={isSubmitting || adminLoading || businessesLoading || !canAddAdmin}
+            disabled={
+              isSubmitting || adminLoading || businessesLoading || !canAddAdmin
+            }
           >
             {isSubmitting || adminLoading
               ? t("buttons.saving") || "Saving..."
@@ -281,4 +347,3 @@ export function AddAdminForm({ onSuccess, onCancel }) {
     </div>
   );
 }
-

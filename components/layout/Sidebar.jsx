@@ -21,10 +21,7 @@ import { useEffect } from "react";
 const navigation = [
   { name: "navigation.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "navigation.business", href: "/business", icon: Eye },
-  { name: "navigation.clients", href: "/clients", icon: Users },
   { name: "navigation.knowledge", href: "/knowledge", icon: BookOpen },
-  { name: "navigation.payments", href: "/payments", icon: CreditCard },
-  { name: "navigation.admins", href: "/admins", icon: Shield },
   { name: "navigation.settings", href: "/settings", icon: Settings },
   { name: "navigation.logout", href: "/logout", icon: LogOut },
 ];

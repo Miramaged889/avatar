@@ -34,6 +34,7 @@
     "addClient": "Add Client",
     "addKnowledgeBase": "Add Knowledge Base",
     "addPayment": "Add Payment",
+    "addAnotherPayment": "Add Another Payment",
     "addAdmin": "Add Admin",
     "addCustomer": "Add Customers",
     "save": "Save",
@@ -69,6 +70,7 @@
     "address": "Address",
     "category": "Category",
     "maxAdmins": "Max Admins",
+    "remaining": "Remaining",
     "uploadFiles": "Upload Files",
     "optional": "Optional",
     "yes": "Yes",
@@ -128,6 +130,8 @@
     "customerName": "Customer Name",
     "clientName": "Client Name",
     "businessName": "Business Name",
+    "fullName": "Full Name",
+    "isActive": "Status",
     "email": "Email",
     "phone": "Phone",
     "phoneNumber": "Phone Number",
@@ -210,7 +214,19 @@
     },
     "basicInfo": "Basic Information",
     "payments": "Payments",
-    "clients": "Clients"
+    "clients": "Clients",
+    "admins": "Admins",
+    "step1Title": "Business Information",
+    "step2Title": "Add Clients",
+    "step3Title": "Add Admins",
+    "step2Description": "Add clients for this business (optional)",
+    "step3Description": "Add admins for this business (optional)",
+    "step4Title": "Add Payments",
+    "step4Description": "Add payments for this business (optional)",
+    "client": "Client",
+    "admin": "Admin",
+    "businessIdInfo": "Business ID: {{id}} - Items will be added to this business",
+    "paymentBusinessIdWarning": "All payments will be associated with the business created in step 1"
   },
   "clients": {
     "pageTitle": "Clients",
@@ -264,7 +280,8 @@
     "amountPaid": "Amount Paid",
     "method": "Payment Method",
     "date": "Payment Date",
-    "note": "Note"
+    "note": "Note",
+    "payment": "Payment"
   },
   "status": {
     "active": "Active",
@@ -312,6 +329,8 @@
     "saveFailed": "Save failed",
     "loading": "Loading...",
     "noBusinesses": "No businesses found",
+    "businessNotCreated": "Business must be created first",
+    "businessIdNotFound": "Business ID not found in response. Please check the console for details.",
     "noClients": "No clients found",
     "clientNotFound": "Client not found",
     "businessCannotChange": "Business cannot be changed for existing clients",
@@ -328,11 +347,15 @@
     "confirmDeleteAnswer": "Are you sure you want to delete this answer?",
     "deleteFailed": "Failed to delete. Please try again.",
     "noPayments": "No payments found",
+    "noPaymentsForBusiness": "No payments found for this business",
     "confirmDeletePayment": "Are you sure you want to delete this payment?",
     "confirmDeleteAdmin": "Are you sure you want to delete this admin?",
     "noAdmins": "No admins found",
     "maxAdminsReached": "Maximum number of admins ({{max}}) has been reached for this business.",
+    "maxAdminsReachedTitle": "Maximum Admins Reached",
+    "maxAdminsReachedDetails": "You have reached the limit of {{max}} admins. Current count: {{current}}/{{max}}",
     "passwordMinLength": "Password must be at least 6 characters",
+    "maxReached": "Limit reached",
     "businessNotFound": "Business not found",
     "businessRequired": "Business information is missing. Please refresh and try again."
   },
@@ -354,6 +377,8 @@
     "deleteAnswer": "Delete answer",
     "editPayment": "Edit payment",
     "deletePayment": "Delete payment",
+    "editPaymentAria": "Edit payment",
+    "deletePaymentAria": "Delete payment",
     "editAdmin": "Edit admin",
     "deleteAdmin": "Delete admin",
     "previousPage": "Previous page",
@@ -448,7 +473,9 @@
   "admin": {
     "pageTitle": "Admins Management",
     "description": "View and manage admins",
-    "maxAdminsInfo": "Max admins: {{max}}, Remaining: {{remaining}}",
+    "maxAdminsInfo": "Maximum: {{max}} admins | Current: {{current}} | Remaining: {{remaining}}",
+    "adminsLimitInfo": "Admin Limit: {{current}}/{{max}} ({{remaining}} remaining)",
+    "maxAdminsLimit": "Limit: {{max}} | Remaining: {{remaining}}",
     "allBusinesses": "All Businesses"
   }
 }

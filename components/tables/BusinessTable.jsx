@@ -105,8 +105,8 @@ export function BusinessTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {businesses.map((business) => (
-            <TableRow key={business.id}>
+          {businesses.map((business, index) => (
+            <TableRow key={business?.id || `business-${index}`}>
               <TableCell className={cn("font-medium", isRTL && "text-left")}>
                 {getBusinessName(business)}
               </TableCell>

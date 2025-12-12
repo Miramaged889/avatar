@@ -14,7 +14,7 @@ import {
 } from "../lib/store/slices/clientSlice";
 import { fetchAllBusinesses } from "../lib/store/slices/businessSlice";
 
-export function AddClientForm({ clientId = null, onSuccess, onCancel }) {
+export function AddClientForm({ clientId = null, businessId = null, onSuccess, onCancel }) {
   const { t, isRTL, locale } = useLocale();
   const dispatch = useDispatch();
   const { currentClient, loading: clientLoading } = useSelector(
@@ -28,7 +28,7 @@ export function AddClientForm({ clientId = null, onSuccess, onCancel }) {
     name: "",
     email: "",
     phone: "",
-    business_id: "",
+    business_id: businessId ? String(businessId) : "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +38,16 @@ export function AddClientForm({ clientId = null, onSuccess, onCancel }) {
       dispatch(fetchAllBusinesses());
     }
   }, [dispatch, businesses]);
+
+  // Set business_id if provided (always update when businessId changes, unless editing)
+  useEffect(() => {
+    if (businessId && !clientId) {
+      setFormData((prev) => ({
+        ...prev,
+        business_id: String(businessId),
+      }));
+    }
+  }, [businessId, clientId]);
 
   // Load client data if editing
   useEffect(() => {
@@ -127,7 +137,7 @@ export function AddClientForm({ clientId = null, onSuccess, onCancel }) {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          business_id: String(formData.business_id),
+          business_id: Number(formData.business_id), // Convert to number as API expects
         };
         const result = await dispatch(addClient(submitData)).unwrap();
         if (onSuccess) onSuccess(result);

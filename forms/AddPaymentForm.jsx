@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addPayment } from "../lib/store/slices/paymentSlice";
 import { fetchAllBusinesses } from "../lib/store/slices/businessSlice";
 
-export function AddPaymentForm({ onSuccess, onCancel }) {
+export function AddPaymentForm({ onSuccess, onCancel, businessId = null }) {
   const { t, isRTL, locale } = useLocale();
   const dispatch = useDispatch();
   const { loading: paymentLoading } = useSelector((state) => state.payment);
@@ -20,7 +20,7 @@ export function AddPaymentForm({ onSuccess, onCancel }) {
   );
 
   const [formData, setFormData] = useState({
-    business_id: "",
+    business_id: businessId ? String(businessId) : "",
     amount_paid: "",
     payment_method: "",
     payment_date: "",
@@ -35,15 +35,23 @@ export function AddPaymentForm({ onSuccess, onCancel }) {
     }
   }, [dispatch, businesses.length]);
 
+  // Set business_id if provided (always update when businessId changes)
+  useEffect(() => {
+    if (businessId) {
+      setFormData((prev) => ({
+        ...prev,
+        business_id: String(businessId),
+      }));
+    }
+  }, [businessId]);
+
   const paymentMethodOptions = [
     { value: "cash", label: t("payment.methods.cash") || "Cash" },
-    { value: "card", label: t("payment.methods.card") || "Card" },
+    { value: "credit_card", label: t("payment.methods.card") || "Credit Card" },
     {
       value: "bank_transfer",
       label: t("payment.methods.bankTransfer") || "Bank Transfer",
     },
-    { value: "check", label: t("payment.methods.check") || "Check" },
-    { value: "other", label: t("payment.methods.other") || "Other" },
   ];
 
   const businessOptions = businesses.map((business) => ({
@@ -78,7 +86,7 @@ export function AddPaymentForm({ onSuccess, onCancel }) {
 
     try {
       const paymentData = {
-        business_id: String(formData.business_id),
+        business_id: Number(formData.business_id), // Convert to number as API expects
         amount_paid: parseFloat(formData.amount_paid) || 0,
         payment_method: formData.payment_method,
         payment_date: formData.payment_date,
@@ -146,7 +154,7 @@ export function AddPaymentForm({ onSuccess, onCancel }) {
           value={formData.business_id ? String(formData.business_id) : ""}
           onChange={(value) => handleChange("business_id", value)}
           required
-          disabled={businessesLoading}
+          disabled={businessesLoading || !!businessId}
         />
 
         {/* Amount Paid */}
