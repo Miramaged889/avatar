@@ -5,14 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Eye,
-  Settings,
   LogOut,
   Globe,
   X,
-  Users,
   BookOpen,
-  CreditCard,
-  Shield,
 } from "lucide-react";
 import { useLocale } from "../utils/useLocale";
 import { cn } from "../utils/cn";
@@ -22,7 +18,6 @@ const navigation = [
   { name: "navigation.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "navigation.business", href: "/business", icon: Eye },
   { name: "navigation.knowledge", href: "/knowledge", icon: BookOpen },
-  { name: "navigation.settings", href: "/settings", icon: Settings },
   { name: "navigation.logout", href: "/logout", icon: LogOut },
 ];
 
