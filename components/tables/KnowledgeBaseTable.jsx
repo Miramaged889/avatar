@@ -92,7 +92,7 @@ export function KnowledgeBaseTable({
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       {/* Questions and Answers Section */}
-      <div className="p-6">
+      {/* <div className="p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           {t("knowledge.questionsAndAnswers") || "Questions & Answers"}
         </h2>
@@ -161,7 +161,7 @@ export function KnowledgeBaseTable({
             })
           )}
         </div>
-      </div>
+      </div> */}
 
       {/* Documents Section */}
       {documents && documents.length > 0 && (

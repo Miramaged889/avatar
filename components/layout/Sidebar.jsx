@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Eye,
+  Settings,
   LogOut,
   Globe,
   X,
@@ -18,6 +19,7 @@ const navigation = [
   { name: "navigation.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "navigation.business", href: "/business", icon: Eye },
   { name: "navigation.knowledge", href: "/knowledge", icon: BookOpen },
+  // { name: "navigation.settings", href: "/settings", icon: Settings },
   { name: "navigation.logout", href: "/logout", icon: LogOut },
 ];
 

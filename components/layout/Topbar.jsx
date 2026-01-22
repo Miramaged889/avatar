@@ -45,24 +45,6 @@ export function Topbar({ onMenuClick }) {
         >
           {t("topbar.logo")}
         </h1>
-        {/* Search - Hide on mobile, show on tablet and up */}
-        <div className="relative hidden md:flex flex-1 max-w-md">
-          <Search
-            className={cn(
-              "absolute top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400",
-              isRTL ? "right-3" : "left-3"
-            )}
-          />
-          <input
-            type="text"
-            placeholder={t("placeholders.search")}
-            className={cn(
-              "w-full rounded-lg border border-gray-600 bg-primary-light py-2 text-sm text-white placeholder-gray-400 focus:border-primary-accent focus:outline-none focus:ring-2 focus:ring-primary-accent/20",
-              isRTL ? "pr-10 pl-4 text-right" : "pl-10 pr-4 text-left"
-            )}
-            aria-label={t("aria.search")}
-          />
-        </div>
 
         <div className="flex items-center gap-3">
 

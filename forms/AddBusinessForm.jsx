@@ -783,6 +783,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                     onChange={(value) =>
                       handleBusinessChange("category", value)
                     }
+                    required
                   />
                 </div>
                 <div className="flex-1">
@@ -791,7 +792,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                       htmlFor="max_admins"
                       className="block text-sm font-medium text-gray-700 text-left"
                     >
-                      {t("labels.maxAdmins") || "Max Admins"}
+                      {t("labels.maxAdmins") || "Max Devices"}
                     </label>
                     <input
                       id="max_admins"
@@ -809,9 +810,10 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                         );
                       }}
                       placeholder={
-                        t("placeholders.maxAdmins") || "Enter max admins"
+                        t("placeholders.maxAdmins") || "Enter max devices"
                       }
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT focus:border-transparent"
+                      required
                     />
                   </div>
                 </div>
@@ -831,14 +833,6 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                 {t("business.step2Description") ||
                   "Add clients for this business (optional)"}
               </p>
-              {createdBusinessId && (
-                <p className="text-xs text-gray-600 mt-2">
-                  {t("business.businessIdInfo", {
-                    id: createdBusinessId,
-                  }) ||
-                    `Business ID: ${createdBusinessId} - Clients will be added to this business`}
-                </p>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -849,7 +843,10 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-700">
-                      {t("business.client") || "Client"} {index + 1}
+                      {t("business.client") || "Client"} {index + 1}{" "}
+                      <span className="text-gray-400 text-sm font-normal">
+                        ({t("labels.optional") || "Optional"})
+                      </span>
                     </h4>
                     {clientsData.length > 1 && (
                       <button
@@ -907,7 +904,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
               type="button"
               variant="outline"
               onClick={addClientRow}
-              className="w-full"
+              className="w-full py-3"
             >
               {t("buttons.addClient") || "Add Another Client"}
             </Button>
@@ -919,33 +916,12 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
           <div className="space-y-6 pb-4">
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {t("business.step3Title") || "Add Admins"}
+                {t("business.step3Title") || "Add Devices"}
               </h3>
               <p className="text-sm text-gray-500">
                 {t("business.step3Description") ||
-                  "Add admins for this business (optional)"}
+                  "Add devices for this business (optional)"}
               </p>
-              {createdBusinessId && (
-                <p className="text-xs text-gray-600 mt-2">
-                  {t("business.businessIdInfo", {
-                    id: createdBusinessId,
-                  }) ||
-                    `Business ID: ${createdBusinessId} - Admins will be added to this business`}
-                </p>
-              )}
-              {maxAdmins !== null && (
-                <p className="text-xs text-gray-600 mt-2">
-                  {t("admin.maxAdminsInfo", {
-                    max: maxAdmins,
-                    current: currentAdminsCount,
-                    remaining:
-                      maxAdmins - currentAdminsCount - adminsData.length,
-                  }) ||
-                    `Max admins: ${maxAdmins}, Current: ${currentAdminsCount}, Remaining: ${
-                      maxAdmins - currentAdminsCount - adminsData.length
-                    }`}
-                </p>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -1040,7 +1016,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                 type="button"
                 variant="outline"
                 onClick={addAdminRow}
-                className="w-full"
+                className="w-full py-3"
               >
                 {t("buttons.addAdmin") || "Add Another Admin"}
               </Button>
@@ -1059,27 +1035,6 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                 {t("business.step4Description") ||
                   "Add payments for this business (optional)"}
               </p>
-              {createdBusinessId ? (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
-                  <p className="text-xs text-blue-800 font-medium">
-                    {t("business.businessIdInfo", {
-                      id: createdBusinessId,
-                    }) ||
-                      `Business ID: ${createdBusinessId} - Payments will be added to this business`}
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    {t("business.paymentBusinessIdWarning") ||
-                      "All payments will be associated with the business created in step 1"}
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-                  <p className="text-xs text-red-800 font-medium">
-                    {t("messages.businessNotCreated") ||
-                      "Business must be created first"}
-                  </p>
-                </div>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -1185,7 +1140,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
               type="button"
               variant="outline"
               onClick={addPaymentRow}
-              className="w-full"
+              className="w-full py-3"
             >
               {t("buttons.addPayment") || "Add Another Payment"}
             </Button>

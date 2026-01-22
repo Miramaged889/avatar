@@ -150,7 +150,7 @@ export default function KnowledgeBasePage() {
             }}
             className="flex-1"
           />
-          <SelectInput
+          {/* <SelectInput
             label={t("knowledge.inputType") || "Input Type"}
             name="input_type_filter"
             placeholder={t("knowledge.allTypes") || "All Types"}
@@ -167,7 +167,7 @@ export default function KnowledgeBasePage() {
             value={filterRequired}
             onChange={(value) => setFilterRequired(value || "all")}
             className="flex-1"
-          />
+          /> */}
         </div>
       </div>
 

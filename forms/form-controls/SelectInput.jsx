@@ -58,9 +58,6 @@ export function SelectInput({
           className="block text-sm font-medium text-gray-700 text-left"
         >
           {displayLabel}
-          {!required && (
-            <span className="text-gray-500 font-normal"> (Optional)</span>
-          )}
         </label>
       )}
       <Select

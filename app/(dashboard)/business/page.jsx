@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/shadcn/SelectWrapper";
-import { Plus } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "../../../components/utils/useLocale";
 import { cn } from "../../../components/utils/cn";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,12 +21,16 @@ import {
   fetchBusinessDetails,
 } from "../../../lib/store/slices/businessSlice";
 
+const ITEMS_PER_PAGE = 8;
+
 export default function BusinessPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
   const [viewingBusinessId, setViewingBusinessId] = useState(null);
-  const { t, formatNumber, isRTL } = useLocale();
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const { t, formatNumber, isRTL, locale } = useLocale();
   const dispatch = useDispatch();
   const { businesses, loading, error } = useSelector((state) => state.business);
 
@@ -35,8 +39,110 @@ export default function BusinessPage() {
     dispatch(fetchAllBusinesses());
   }, [dispatch]);
 
+  // Sort and paginate businesses
+  const sortedAndPaginatedBusinesses = () => {
+    let sorted = [...businesses];
+
+    // Sort businesses
+    if (sortBy === "newest") {
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        return dateB - dateA;
+      });
+    } else if (sortBy === "oldest") {
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        return dateA - dateB;
+      });
+    } else if (sortBy === "name") {
+      sorted.sort((a, b) => {
+        const nameA = (locale === "ar" && a.name_ar ? a.name_ar : a.name_en || "").toLowerCase();
+        const nameB = (locale === "ar" && b.name_ar ? b.name_ar : b.name_en || "").toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    }
+
+    // Paginate
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return sorted.slice(startIndex, endIndex);
+  };
+
+  const paginatedBusinesses = sortedAndPaginatedBusinesses();
+  const totalPages = Math.ceil(businesses.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, businesses.length);
+
+  // Reset to page 1 when sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortBy]);
+
   const handleAddSuccess = (data) => {
     dispatch(fetchAllBusinesses());
+  };
+
+  const handleSortChange = (value) => {
+    setSortBy(value);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5; // Show max 5 page numbers at once
+
+    if (totalPages <= maxVisible) {
+      // Show all pages if total is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show pages around current page
+      if (currentPage <= 3) {
+        // Show first pages
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Show last pages
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Show middle pages
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   const handleEdit = (businessId) => {
@@ -83,7 +189,7 @@ export default function BusinessPage() {
             isRTL && "sm:flex-row"
           )}
         >
-          <Select defaultValue="newest">
+          <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue
                 placeholder={t("business.sortBy.newest") || "Newest"}
@@ -135,7 +241,7 @@ export default function BusinessPage() {
         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
           <div className="min-w-[600px] sm:min-w-full">
             <BusinessTable
-              businesses={businesses}
+              businesses={paginatedBusinesses}
               onEdit={handleEdit}
               onView={handleView}
               loading={loading}
@@ -145,68 +251,84 @@ export default function BusinessPage() {
       )}
 
       {/* Pagination */}
-      <div
-        className={cn(
-          "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4",
-          isRTL && "sm:flex-row-reverse"
-        )}
-      >
-        <p
-          className={cn(
-            "text-xs sm:text-sm text-gray-500 text-center sm:text-left",
-            isRTL && "sm:text-right"
-          )}
-        >
-          {t("business.pagination.showing") || "Showing"} 1{" "}
-          {t("business.pagination.to") || "to"}{" "}
-          {businesses.length > 8 ? 8 : businesses.length}{" "}
-          {t("business.pagination.of") || "of"} {businesses.length}{" "}
-          {t("business.pagination.entries") || "entries"}
-        </p>
+      {!loading && businesses.length > 0 && (
         <div
           className={cn(
-            "flex items-center justify-center gap-1 sm:gap-2 overflow-x-auto",
+            "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4",
             isRTL && "sm:flex-row-reverse"
           )}
         >
-          <button
+          <p
             className={cn(
-              "px-2 sm:px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm shrink-0",
-              isRTL && "rotate-180"
+              "text-xs sm:text-sm text-gray-500 text-center sm:text-left",
+              isRTL && "sm:text-right"
             )}
-            aria-label={t("aria.previousPage") || "Previous page"}
           >
-            ←
-          </button>
-          <button className="px-2 sm:px-3 py-1 rounded border border-gray-300 bg-accent-yellow text-gray-900 hover:bg-accent-yellow/90 text-xs sm:text-sm font-medium shrink-0">
-            1
-          </button>
-          <button className="hidden sm:inline-block px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm shrink-0">
-            2
-          </button>
-          <button className="hidden sm:inline-block px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm shrink-0">
-            3
-          </button>
-          <button className="hidden md:inline-block px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm shrink-0">
-            4
-          </button>
-          <span className="hidden md:inline-block px-2 text-gray-500 text-sm shrink-0">
-            ...
-          </span>
-          <button className="hidden md:inline-block px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm shrink-0">
-            40
-          </button>
-          <button
+            {t("business.pagination.showing") || "Showing"} {startIndex}{" "}
+            {t("business.pagination.to") || "to"} {endIndex}{" "}
+            {t("business.pagination.of") || "of"} {businesses.length}{" "}
+            {t("business.pagination.entries") || "entries"}
+          </p>
+          <div
             className={cn(
-              "px-2 sm:px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm shrink-0",
-              isRTL && "rotate-180"
+              "flex items-center justify-center gap-1 sm:gap-2 overflow-x-auto",
+              isRTL && "sm:flex-row-reverse"
             )}
-            aria-label={t("aria.nextPage") || "Next page"}
           >
-            →
-          </button>
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className={cn(
+                "px-2 sm:px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed",
+                isRTL && "rotate-180"
+              )}
+              aria-label={t("aria.previousPage") || "Previous page"}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            {getPageNumbers().map((page, index) => {
+              if (page === "...") {
+                return (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="hidden md:inline-block px-2 text-gray-500 text-sm shrink-0"
+                  >
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={cn(
+                    "px-2 sm:px-3 py-1 rounded border border-gray-300 text-xs sm:text-sm shrink-0 transition-colors",
+                    currentPage === page
+                      ? "bg-accent-yellow text-gray-900 hover:bg-accent-yellow/90 font-medium"
+                      : "hover:bg-gray-50",
+                    index === 0 || index === getPageNumbers().length - 1
+                      ? "inline-block"
+                      : "hidden sm:inline-block"
+                  )}
+                >
+                  {page}
+                </button>
+              );
+            })}
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={cn(
+                "px-2 sm:px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs sm:text-sm shrink-0 disabled:opacity-50 disabled:cursor-not-allowed",
+                isRTL && "rotate-180"
+              )}
+              aria-label={t("aria.nextPage") || "Next page"}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add/Edit Business Modal */}
       <AddBusinessModal
