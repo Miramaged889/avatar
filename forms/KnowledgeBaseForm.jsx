@@ -153,7 +153,46 @@ export function KnowledgeBaseForm({ businessId, onSuccess, onCancel }) {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);
-    setSelectedFiles((prev) => [...prev, ...files]);
+    
+    // Allowed text file extensions
+    const allowedExtensions = ['.txt', '.text', '.pdf'];
+    const allowedMimeTypes = ['text/plain', 'text/txt', 'application/pdf'];
+    
+    // Filter and validate files
+    const validFiles = [];
+    const invalidFiles = [];
+    
+    files.forEach((file) => {
+      const fileName = file.name.toLowerCase();
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+      const fileType = file.type.toLowerCase();
+      
+      // Check if file is a text file
+      const isValidExtension = allowedExtensions.includes(fileExtension);
+      const isValidMimeType = allowedMimeTypes.includes(fileType) || fileType.startsWith('text/');
+      
+      if (isValidExtension || isValidMimeType) {
+        validFiles.push(file);
+      } else {
+        invalidFiles.push(file.name);
+      }
+    });
+    
+    // Show error if any invalid files
+    if (invalidFiles.length > 0) {
+      alert(
+        t("messages.invalidFileType") ||
+          `The following files are not text files and cannot be uploaded:\n${invalidFiles.join('\n')}\n\nPlease upload only .txt files.`
+      );
+    }
+    
+    // Add only valid files
+    if (validFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+    }
+    
+    // Reset input to allow selecting the same file again if needed
+    e.target.value = '';
   };
 
   const removeFile = (index) => {
@@ -570,7 +609,11 @@ export function KnowledgeBaseForm({ businessId, onSuccess, onCancel }) {
               </h2>
               <p className="text-gray-600">
                 {t("knowledge.step3Description") ||
-                  "Upload relevant files (required)"}
+                  "Upload text files only (.txt) (required)"}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                {t("knowledge.step3FileTypeNote") ||
+                  "Only .txt text files are allowed. Images and other file types are not permitted."}
               </p>
             </div>
             <div className="space-y-2">
@@ -594,6 +637,7 @@ export function KnowledgeBaseForm({ businessId, onSuccess, onCancel }) {
                 <input
                   type="file"
                   multiple
+                  accept=".txt,.text ,.pdf"
                   onChange={handleFileChange}
                   className="hidden"
                   id="knowledge-files"

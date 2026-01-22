@@ -5,13 +5,6 @@ import { BusinessTable } from "../../../components/tables/BusinessTable";
 import { AddBusinessModal } from "../../../components/modals/business/AddBusinessModal";
 import { ViewBusinessModal } from "../../../components/modals/business/ViewBusinessModal";
 import { Button } from "../../../components/shadcn/ButtonWrapper";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/shadcn/SelectWrapper";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "../../../components/utils/useLocale";
 import { cn } from "../../../components/utils/cn";
@@ -28,9 +21,8 @@ export default function BusinessPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
   const [viewingBusinessId, setViewingBusinessId] = useState(null);
-  const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const { t, formatNumber, isRTL, locale } = useLocale();
+  const { t, formatNumber, isRTL } = useLocale();
   const dispatch = useDispatch();
   const { businesses, loading, error } = useSelector((state) => state.business);
 
@@ -39,53 +31,20 @@ export default function BusinessPage() {
     dispatch(fetchAllBusinesses());
   }, [dispatch]);
 
-  // Sort and paginate businesses
-  const sortedAndPaginatedBusinesses = () => {
-    let sorted = [...businesses];
-
-    // Sort businesses
-    if (sortBy === "newest") {
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        return dateB - dateA;
-      });
-    } else if (sortBy === "oldest") {
-      sorted.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        return dateA - dateB;
-      });
-    } else if (sortBy === "name") {
-      sorted.sort((a, b) => {
-        const nameA = (locale === "ar" && a.name_ar ? a.name_ar : a.name_en || "").toLowerCase();
-        const nameB = (locale === "ar" && b.name_ar ? b.name_ar : b.name_en || "").toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-    }
-
-    // Paginate
+  // Paginate businesses
+  const paginatedBusinesses = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return sorted.slice(startIndex, endIndex);
+    return businesses.slice(startIndex, endIndex);
   };
 
-  const paginatedBusinesses = sortedAndPaginatedBusinesses();
+  const paginatedBusinessesList = paginatedBusinesses();
   const totalPages = Math.ceil(businesses.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
   const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, businesses.length);
 
-  // Reset to page 1 when sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortBy]);
-
   const handleAddSuccess = (data) => {
     dispatch(fetchAllBusinesses());
-  };
-
-  const handleSortChange = (value) => {
-    setSortBy(value);
   };
 
   const handlePageChange = (page) => {
@@ -189,25 +148,6 @@ export default function BusinessPage() {
             isRTL && "sm:flex-row"
           )}
         >
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue
-                placeholder={t("business.sortBy.newest") || "Newest"}
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">
-                {t("business.sortBy.newest") || "Newest"}
-              </SelectItem>
-              <SelectItem value="oldest">
-                {t("business.sortBy.oldest") || "Oldest"}
-              </SelectItem>
-              <SelectItem value="name">
-                {t("business.sortBy.name") || "Name"}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
           <Button
             variant="dark"
             onClick={() => {
@@ -241,7 +181,7 @@ export default function BusinessPage() {
         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
           <div className="min-w-[600px] sm:min-w-full">
             <BusinessTable
-              businesses={paginatedBusinesses}
+              businesses={paginatedBusinessesList}
               onEdit={handleEdit}
               onView={handleView}
               loading={loading}
