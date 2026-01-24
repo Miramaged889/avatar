@@ -39,6 +39,7 @@
     "addCustomer": "Add Customers",
     "save": "Save",
     "saving": "Saving...",
+    "saveAvatar": "Save Avatar",
     "cancel": "Cancel",
     "viewAll": "View All Customers",
     "uploadData": "Upload Data",
@@ -222,6 +223,13 @@
     "step3Description": "Add devices for this business (optional)",
     "step4Title": "Add Payments",
     "step4Description": "Add payments for this business (optional)",
+    "step5Title": "Choose Avatar",
+    "step5Description": "Select an avatar for this business",
+    "avatarTitle": "Business Avatar",
+    "avatarDescription": "Choose an avatar for this business",
+    "avatarSelectedLabel": "Selected",
+    "avatarSaveHint": "Save your avatar selection for this business",
+    "avatarSaveDisabled": "You can save the avatar after creating the business",
     "client": "Client",
     "admin": "Admin",
     "businessIdInfo": "Business ID: {{id}} - Items will be added to this business",
@@ -316,6 +324,8 @@
   },
   "messages": {
     "saveSuccess": "Customer added successfully!",
+    "profileUpdated": "Profile updated successfully",
+    "profileUpdateFailed": "Failed to update profile",
     "loginSuccess": "Logged in successfully!",
     "loginFailed": "Login failed. Please check your credentials.",
     "forgotPassword": "Forgot your password?",
@@ -324,8 +334,10 @@
     "maxFileSize": "Max file size up to 1 GB",
     "noFileChosen": "No file chosen",
     "fillRequiredFields": "Please fill in all required fields",
+    "requiredField": "This field is required",
     "devicesRange": "Number of devices must be between 0 and 50",
     "saveFailed": "Save failed",
+    "loadProfileFailed": "Failed to load account info",
     "loading": "Loading...",
     "noBusinesses": "No businesses found",
     "businessNotCreated": "Business must be created first",
@@ -341,6 +353,11 @@
     "filesSelected": "file(s) selected. Click to change.",
     "noFilesSelected": "No files selected. Please upload at least one file.",
     "answerAtLeastOne": "Please answer at least one question before proceeding",
+    "failedToLoadAvatars": "Failed to load avatars",
+    "noAvatars": "No avatars available",
+    "selectAvatar": "Please select an avatar",
+    "avatarConfigSaved": "Avatar configuration saved successfully",
+    "avatarConfigFailed": "Failed to save business avatar configuration",
     "confirmDelete": "Are you sure you want to delete this business?",
     "confirmDeleteClient": "Are you sure you want to delete this client?",
     "confirmDeleteAnswer": "Are you sure you want to delete this answer?",
@@ -354,6 +371,9 @@
     "maxAdminsReachedTitle": "Maximum Admins Reached",
     "maxAdminsReachedDetails": "You have reached the limit of {{max}} admins. Current count: {{current}}/{{max}}",
     "passwordMinLength": "Password must be at least 6 characters",
+    "passwordsDoNotMatch": "New password and confirmation do not match",
+    "passwordUpdated": "Password updated successfully",
+    "passwordUpdateFailed": "Failed to update password",
     "maxReached": "Limit reached",
     "businessNotFound": "Business not found",
     "businessRequired": "Business information is missing. Please refresh and try again."
@@ -420,6 +440,9 @@
     "pageDescription": "Manage your account settings and preferences",
     "profile": {
       "title": "Profile Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "username": "Username",
       "description": "Update your personal information",
       "changeAvatar": "Change Avatar",
       "avatarHint": "JPG, PNG or GIF. Max size 2MB",
@@ -436,7 +459,8 @@
       "newPassword": "New Password",
       "confirmPassword": "Confirm New Password",
       "twoFactor": "Enable Two-Factor Authentication",
-      "updatePassword": "Update Password"
+      "updatePassword": "Update Password",
+      "updatingPassword": "Updating Password..."
     },
     "notifications": {
       "title": "Notifications",
@@ -463,8 +487,10 @@
       "title": "Account Status",
       "status": "Status",
       "active": "Active",
+      "inactive": "Inactive",
       "memberSince": "Member Since",
-      "lastLogin": "Last Login"
+      "lastLogin": "Last Login",
+      "neverLoggedIn": "Never logged in"
     }
   },
   "admin": {

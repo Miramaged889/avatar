@@ -34,6 +34,7 @@
     "addCustomer": "إضافة عملاء",
     "save": "حفظ",
     "saving": "جاري الحفظ...",
+    "saveAvatar": "حفظ الصورة الرمزية",
     "cancel": "إلغاء",
     "viewAll": "عرض جميع العملاء",
     "uploadData": "رفع البيانات",
@@ -221,6 +222,13 @@
     "step3Description": "إضافة الأجهزة لهذا العمل (اختياري)",
     "step4Title": "إضافة مدفوعات",
     "step4Description": "إضافة مدفوعات لهذا العمل (اختياري)",
+    "step5Title": "اختيار الصورة الرمزية",
+    "step5Description": "اختر صورة رمزية لهذا العمل",
+    "avatarTitle": "الصورة الرمزية للعمل",
+    "avatarDescription": "اختر صورة رمزية لهذا العمل",
+    "avatarSelectedLabel": "محدد",
+    "avatarSaveHint": "احفظ اختيار الصورة الرمزية لهذا العمل",
+    "avatarSaveDisabled": "يمكنك حفظ الصورة الرمزية بعد إنشاء العمل",
     "client": "عميل",
     "admin": "مشرف",
     "businessIdInfo": "معرف العمل: {{id}} - سيتم إضافة العناصر إلى هذا العمل",
@@ -315,6 +323,8 @@
   },
   "messages": {
     "saveSuccess": "تمت إضافة العميل بنجاح!",
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "profileUpdateFailed": "فشل تحديث الملف الشخصي",
     "loginSuccess": "تم تسجيل الدخول بنجاح!",
     "loginFailed": "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد.",
     "forgotPassword": "نسيت كلمة المرور؟",
@@ -323,8 +333,10 @@
     "maxFileSize": "الحد الأقصى لحجم الملف حتى 1 جيجابايت",
     "noFileChosen": "لم يتم اختيار ملف",
     "fillRequiredFields": "يرجى ملء جميع الحقول المطلوبة",
+    "requiredField": "هذه الخانة مطلوبة",
     "devicesRange": "يجب أن يكون عدد الأجهزة بين 0 و 50",
     "saveFailed": "فشل الحفظ",
+    "loadProfileFailed": "فشل تحميل معلومات الحساب",
     "loading": "جاري التحميل...",
     "noBusinesses": "لم يتم العثور على أعمال",
     "businessNotCreated": "يجب إنشاء العمل أولاً",
@@ -340,6 +352,11 @@
     "filesSelected": "ملف(ات) تم اختياره. انقر للتغيير.",
     "noFilesSelected": "لم يتم اختيار ملفات. يرجى رفع ملف واحد على الأقل.",
     "answerAtLeastOne": "يرجى الإجابة على سؤال واحد على الأقل قبل المتابعة",
+    "failedToLoadAvatars": "فشل تحميل الصور الرمزية",
+    "noAvatars": "لا توجد صور رمزية متاحة",
+    "selectAvatar": "يرجى اختيار صورة رمزية",
+    "avatarConfigSaved": "تم حفظ إعداد الصورة الرمزية بنجاح",
+    "avatarConfigFailed": "فشل حفظ إعداد الصورة الرمزية للعمل",
     "confirmDelete": "هل أنت متأكد من حذف هذا العمل؟",
     "confirmDeleteClient": "هل أنت متأكد من حذف هذا العميل؟",
     "confirmDeleteAnswer": "هل أنت متأكد من حذف هذه الإجابة؟",
@@ -353,6 +370,9 @@
     "maxAdminsReachedTitle": "تم الوصول إلى الحد الأقصى للمشرفين",
     "maxAdminsReachedDetails": "لقد وصلت إلى حد {{max}} مشرف. العدد الحالي: {{current}}/{{max}}",
     "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "passwordsDoNotMatch": "كلمة المرور الجديدة وتأكيدها غير متطابقين",
+    "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
+    "passwordUpdateFailed": "فشل تحديث كلمة المرور",
     "maxReached": "تم الوصول إلى الحد الأقصى",
     "businessNotFound": "لم يتم العثور على العمل",
     "businessRequired": "معلومات العمل مفقودة. يرجى تحديث الصفحة والمحاولة مرة أخرى."
@@ -421,6 +441,9 @@
     "pageDescription": "إدارة إعدادات حسابك وتفضيلاتك",
     "profile": {
       "title": "معلومات الملف الشخصي",
+      "firstName": "الاسم الأول",
+      "lastName": "الاسم الأخير",
+      "username": "اسم المستخدم",
       "description": "قم بتحديث معلوماتك الشخصية",
       "changeAvatar": "تغيير الصورة الرمزية",
       "avatarHint": "JPG أو PNG أو GIF. الحد الأقصى للحجم 2 ميجابايت",
@@ -437,7 +460,8 @@
       "newPassword": "كلمة المرور الجديدة",
       "confirmPassword": "تأكيد كلمة المرور الجديدة",
       "twoFactor": "تفعيل المصادقة الثنائية",
-      "updatePassword": "تحديث كلمة المرور"
+      "updatePassword": "تحديث كلمة المرور",
+      "updatingPassword": "جاري تحديث كلمة المرور..."
     },
     "notifications": {
       "title": "الإشعارات",
@@ -464,8 +488,10 @@
       "title": "حالة الحساب",
       "status": "الحالة",
       "active": "نشط",
+      "inactive": "غير نشط",
       "memberSince": "عضو منذ",
-      "lastLogin": "آخر تسجيل دخول"
+      "lastLogin": "آخر تسجيل دخول",
+      "neverLoggedIn": "لم يسجّل الدخول بعد"
     }
   },
   "admin": {

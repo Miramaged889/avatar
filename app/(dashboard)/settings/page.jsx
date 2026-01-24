@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -36,48 +37,345 @@ import {
 import { useLocale } from "../../../components/utils/useLocale";
 import { cn } from "../../../components/utils/cn";
 import {
+  changeSuperuserPassword,
+  getSuperuserMe,
+  updateSuperuserMe,
+} from "../../../lib/api/authApi";
+import {
   Avatar,
   AvatarImage,
   AvatarFallback,
 } from "../../../components/shadcn/AvatarWrapper";
 
 export default function SettingsPage() {
-  const { t, isRTL } = useLocale();
+  const { t, isRTL, locale, setLocale } = useLocale();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState({
+    currentPassword: [],
+    newPassword: [],
+    confirmPassword: [],
+  });
 
   const [settings, setSettings] = useState({
     // Profile
-    fullName: "Admin User",
-    email: "admin@example.com",
-    phone: "+1 (555) 123-4567",
-    company: "Company Name",
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phone: "",
+    company: "",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
 
     // Security
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    twoFactorEnabled: false,
 
-    // Notifications
-    emailNotifications: true,
-    pushNotifications: true,
-    smsNotifications: false,
-    marketingEmails: false,
-
-    // General
-    language: "en",
+    // Account status
+    isActive: true,
+    dateJoined: null,
+    lastLogin: null,
   });
 
   const handleChange = (field, value) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
+    if (
+      field === "currentPassword" ||
+      field === "newPassword" ||
+      field === "confirmPassword"
+    ) {
+      setPasswordErrors((prev) => ({
+        ...prev,
+        [field]: [],
+      }));
+    }
   };
 
   const handleSave = (section) => {
     console.log(`Saving ${section} settings:`, settings);
     // Add save logic here
+  };
+
+  const handleProfileSave = async () => {
+    if (isSavingProfile) {
+      return;
+    }
+
+    if (!settings.username || !settings.email) {
+      alert(
+        t("messages.fillRequiredFields") || "Please fill in all required fields"
+      );
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const result = await updateSuperuserMe({
+        first_name: settings.firstName || "",
+        last_name: settings.lastName || "",
+        username: settings.username,
+        email: settings.email,
+      });
+
+      if (result.success) {
+        const data = result.data || {};
+        setSettings((prev) => ({
+          ...prev,
+          firstName: data.first_name ?? prev.firstName,
+          lastName: data.last_name ?? prev.lastName,
+          username: data.username ?? prev.username,
+          email: data.email ?? prev.email,
+        }));
+        alert(
+          t("messages.profileUpdated") || "Profile updated successfully"
+        );
+        return;
+      }
+
+      const err = result.error;
+      let errorMessage =
+        t("messages.profileUpdateFailed") || "Failed to update profile";
+
+      if (err?.username) {
+        errorMessage = Array.isArray(err.username)
+          ? err.username.join(", ")
+          : err.username;
+      } else if (err?.email) {
+        errorMessage = Array.isArray(err.email)
+          ? err.email.join(", ")
+          : err.email;
+      } else if (err?.first_name) {
+        errorMessage = Array.isArray(err.first_name)
+          ? err.first_name.join(", ")
+          : err.first_name;
+      } else if (err?.last_name) {
+        errorMessage = Array.isArray(err.last_name)
+          ? err.last_name.join(", ")
+          : err.last_name;
+      } else if (err?.detail) {
+        errorMessage =
+          typeof err.detail === "string"
+            ? err.detail
+            : Array.isArray(err.detail)
+            ? err.detail.join(", ")
+            : JSON.stringify(err.detail);
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      alert(errorMessage);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert(t("messages.profileUpdateFailed") || "Failed to update profile");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadAccountInfo = async () => {
+      const result = await getSuperuserMe();
+      if (!result.success) {
+        const err = result.error;
+        let errorMessage =
+          t("messages.loadProfileFailed") || "Failed to load account info";
+
+        if (err?.detail) {
+          errorMessage =
+            typeof err.detail === "string"
+              ? err.detail
+              : Array.isArray(err.detail)
+              ? err.detail.join(", ")
+              : JSON.stringify(err.detail);
+        } else if (typeof err === "string") {
+          errorMessage = err;
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+
+        alert(errorMessage);
+        return;
+      }
+
+      const data = result.data;
+      const derivedName =
+        [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+        data.username ||
+        "";
+
+      setSettings((prev) => ({
+        ...prev,
+        firstName: data.first_name || "",
+        lastName: data.last_name || "",
+        username: data.username || "",
+        email: data.email || "",
+        isActive: Boolean(data.is_active),
+        dateJoined: data.date_joined || null,
+        lastLogin: data.last_login || null,
+        avatar:
+          prev.avatar ||
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+            derivedName || "Admin"
+          )}`,
+      }));
+    };
+
+    loadAccountInfo();
+  }, [t]);
+
+  const handlePasswordUpdate = async () => {
+    if (isUpdatingPassword) {
+      return;
+    }
+
+    const nextErrors = {
+      currentPassword: [],
+      newPassword: [],
+      confirmPassword: [],
+    };
+
+    if (
+      !settings.currentPassword ||
+      !settings.newPassword ||
+      !settings.confirmPassword
+    ) {
+      const requiredMessage =
+        t("messages.requiredField") || "This field is required";
+      if (!settings.currentPassword) {
+        nextErrors.currentPassword.push(requiredMessage);
+      }
+      if (!settings.newPassword) {
+        nextErrors.newPassword.push(requiredMessage);
+      }
+      if (!settings.confirmPassword) {
+        nextErrors.confirmPassword.push(requiredMessage);
+      }
+    }
+
+    if (settings.newPassword !== settings.confirmPassword) {
+      nextErrors.confirmPassword.push(
+        t("messages.passwordsDoNotMatch") ||
+          "New password and confirmation do not match"
+      );
+    }
+
+    if (settings.newPassword.length < 6) {
+      nextErrors.newPassword.push(
+        t("messages.passwordMinLength") ||
+          "Password must be at least 6 characters"
+      );
+    }
+
+    if (
+      nextErrors.currentPassword.length > 0 ||
+      nextErrors.newPassword.length > 0 ||
+      nextErrors.confirmPassword.length > 0
+    ) {
+      setPasswordErrors(nextErrors);
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const result = await changeSuperuserPassword({
+        oldPassword: settings.currentPassword,
+        newPassword: settings.newPassword,
+        confirmNewPassword: settings.confirmPassword,
+      });
+
+      if (result.success) {
+        alert(
+          t("messages.passwordUpdated") || "Password updated successfully"
+        );
+        setSettings((prev) => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        }));
+        setPasswordErrors({
+          currentPassword: [],
+          newPassword: [],
+          confirmPassword: [],
+        });
+        return;
+      }
+
+      const err = result.error;
+      const apiErrors = {
+        currentPassword: [],
+        newPassword: [],
+        confirmPassword: [],
+      };
+      const normalizeErrors = (value) =>
+        Array.isArray(value) ? value : value ? [value] : [];
+
+      if (err?.non_field_errors) {
+        apiErrors.newPassword.push(...normalizeErrors(err.non_field_errors));
+      }
+      if (err?.old_password) {
+        apiErrors.currentPassword.push(...normalizeErrors(err.old_password));
+      }
+      if (err?.new_password) {
+        apiErrors.newPassword.push(...normalizeErrors(err.new_password));
+      }
+      if (err?.confirm_new_password) {
+        apiErrors.confirmPassword.push(
+          ...normalizeErrors(err.confirm_new_password)
+        );
+      }
+
+      if (err?.detail) {
+        apiErrors.newPassword.push(
+          ...(normalizeErrors(err.detail).map((item) =>
+            typeof item === "string" ? item : JSON.stringify(item)
+          ))
+        );
+      } else if (typeof err === "string") {
+        apiErrors.newPassword.push(err);
+      } else if (err?.message) {
+        apiErrors.newPassword.push(err.message);
+      }
+
+      if (
+        apiErrors.currentPassword.length === 0 &&
+        apiErrors.newPassword.length === 0 &&
+        apiErrors.confirmPassword.length === 0
+      ) {
+        apiErrors.newPassword.push(
+          t("messages.passwordUpdateFailed") || "Failed to update password"
+        );
+      }
+
+      setPasswordErrors(apiErrors);
+    } catch (error) {
+      console.error("Error updating password:", error);
+      setPasswordErrors({
+        currentPassword: [],
+        newPassword: [
+          t("messages.passwordUpdateFailed") || "Failed to update password",
+        ],
+        confirmPassword: [],
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleLanguageChange = (newLocale) => {
+    setLocale(newLocale);
+    // Match sidebar behavior to fully apply language changes
+    setTimeout(() => {
+      router.refresh();
+      window.location.reload();
+    }, 100);
   };
 
   const handleAvatarChange = (e) => {
@@ -100,6 +398,26 @@ export default function SettingsPage() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const displayName =
+    [settings.firstName, settings.lastName].filter(Boolean).join(" ") ||
+    settings.username ||
+    "Admin";
+  const localeForDate = locale === "ar" ? "ar" : "en";
+  const formatDate = (value) => {
+    if (!value) {
+      return "-";
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return "-";
+    }
+    return new Intl.DateTimeFormat(localeForDate, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(parsed);
   };
 
   return (
@@ -140,9 +458,9 @@ export default function SettingsPage() {
                 className={cn("flex items-center gap-4", isRTL && "flex-row")}
               >
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={settings.avatar} alt={settings.fullName} />
+                  <AvatarImage src={settings.avatar} alt={displayName} />
                   <AvatarFallback className="bg-primary-default text-white text-xl">
-                    {settings.fullName.charAt(0)}
+                    {displayName.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -172,10 +490,24 @@ export default function SettingsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TextInput
-                  label={t("settings.profile.fullName")}
-                  name="fullName"
-                  value={settings.fullName}
-                  onChange={(e) => handleChange("fullName", e.target.value)}
+                  label={t("settings.profile.firstName")}
+                  name="firstName"
+                  value={settings.firstName}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                  required
+                />
+                <TextInput
+                  label={t("settings.profile.lastName")}
+                  name="lastName"
+                  value={settings.lastName}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
+                  required
+                />
+                <TextInput
+                  label={t("settings.profile.username")}
+                  name="username"
+                  value={settings.username}
+                  onChange={(e) => handleChange("username", e.target.value)}
                   required
                 />
                 <TextInput
@@ -186,18 +518,6 @@ export default function SettingsPage() {
                   onChange={(e) => handleChange("email", e.target.value)}
                   required
                 />
-                <TextInput
-                  label={t("settings.profile.phoneNumber")}
-                  name="phone"
-                  value={settings.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                />
-                <TextInput
-                  label={t("settings.profile.company")}
-                  name="company"
-                  value={settings.company}
-                  onChange={(e) => handleChange("company", e.target.value)}
-                />
               </div>
 
               <div
@@ -207,8 +527,9 @@ export default function SettingsPage() {
                 )}
               >
                 <Button
-                  onClick={() => handleSave("profile")}
+                  onClick={handleProfileSave}
                   className="flex items-center gap-2"
+                  disabled={isSavingProfile}
                 >
                   <Save className="h-4 w-4" />
                   {t("settings.profile.saveChanges")}
@@ -245,6 +566,7 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("currentPassword", e.target.value)
                     }
+                    error={passwordErrors.currentPassword}
                     required
                   />
                   <button
@@ -272,6 +594,7 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("newPassword", e.target.value)
                     }
+                    error={passwordErrors.newPassword}
                     required
                   />
                   <button
@@ -299,6 +622,7 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("confirmPassword", e.target.value)
                     }
+                    error={passwordErrors.confirmPassword}
                     required
                   />
                   <button
@@ -325,18 +649,21 @@ export default function SettingsPage() {
                 )}
               >
                 <Button
-                  onClick={() => handleSave("security")}
+                  onClick={handlePasswordUpdate}
                   className="flex items-center gap-2"
+                  disabled={isUpdatingPassword}
                 >
                   <Save className="h-4 w-4" />
-                  {t("settings.security.updatePassword")}
+                  {isUpdatingPassword
+                    ? t("settings.security.updatingPassword")
+                    : t("settings.security.updatePassword")}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Notification Settings */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <div
                 className={cn("flex items-center gap-3", isRTL && "flex-row")}
@@ -428,7 +755,7 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* General Settings */}
           <Card>
@@ -457,12 +784,9 @@ export default function SettingsPage() {
                 >
                   {t("settings.general.language")}
                 </label>
-                <Select
-                  value={settings.language}
-                  onValueChange={(v) => handleChange("language", v)}
-                >
+                <Select value={locale} onValueChange={handleLanguageChange}>
                   <SelectTrigger
-                    className={cn(isRTL ? "text-right" : "text-left")}
+                    className={cn(isRTL ? "text-right" : "text-right")}
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -493,7 +817,7 @@ export default function SettingsPage() {
 
         {/* Sidebar - Quick Actions */}
         <div className="space-y-6">
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle className={cn("text-lg", isRTL && "text-left")}>
                 {t("settings.quickActions.title")}
@@ -534,7 +858,7 @@ export default function SettingsPage() {
                 {t("settings.quickActions.deleteAccount")}
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card>
             <CardHeader>
@@ -552,8 +876,17 @@ export default function SettingsPage() {
                 <span className="text-sm text-gray-600">
                   {t("settings.accountStatus.status")}
                 </span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                  {t("settings.accountStatus.active")}
+                <span
+                  className={cn(
+                    "px-2 py-1 rounded text-xs font-medium",
+                    settings.isActive
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  )}
+                >
+                  {settings.isActive
+                    ? t("settings.accountStatus.active")
+                    : t("settings.accountStatus.inactive")}
                 </span>
               </div>
               <div
@@ -565,7 +898,9 @@ export default function SettingsPage() {
                 <span className="text-sm text-gray-600">
                   {t("settings.accountStatus.memberSince")}
                 </span>
-                <span className="text-sm font-medium">Jan 2024</span>
+                <span className="text-sm font-medium">
+                  {formatDate(settings.dateJoined)}
+                </span>
               </div>
               <div
                 className={cn(
@@ -576,7 +911,11 @@ export default function SettingsPage() {
                 <span className="text-sm text-gray-600">
                   {t("settings.accountStatus.lastLogin")}
                 </span>
-                <span className="text-sm font-medium">2 hours ago</span>
+                <span className="text-sm font-medium">
+                  {settings.lastLogin
+                    ? formatDate(settings.lastLogin)
+                    : t("settings.accountStatus.neverLoggedIn")}
+                </span>
               </div>
             </CardContent>
           </Card>

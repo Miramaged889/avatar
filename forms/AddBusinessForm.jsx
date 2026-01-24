@@ -18,6 +18,11 @@ import {
 import { addClient, fetchAllClients } from "../lib/store/slices/clientSlice";
 import { addAdmin, fetchAllAdmins } from "../lib/store/slices/adminSlice";
 import { addPayment, fetchAllPayments } from "../lib/store/slices/paymentSlice";
+import {
+  getAllAvatars,
+  getBusinessAvatarConfig,
+  createBusinessAvatarConfig,
+} from "../lib/api/avatarApi";
 
 const categories = [
   { value: "finance", label: "Finance" },
@@ -69,10 +74,17 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
     { amount_paid: "", payment_method: "", payment_date: "", note: "" },
   ]);
 
+  const [avatars, setAvatars] = useState([]);
+  const [selectedAvatarId, setSelectedAvatarId] = useState(null);
+  const [avatarsLoading, setAvatarsLoading] = useState(false);
+  const [avatarsError, setAvatarsError] = useState(null);
+  const [avatarConfigValue, setAvatarConfigValue] = useState(null);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+
   const [maxAdmins, setMaxAdmins] = useState(null);
   const [currentAdminsCount, setCurrentAdminsCount] = useState(0);
 
-  const totalSteps = businessId ? 1 : 4; // If editing, only show business form
+  const totalSteps = businessId ? 1 : 5; // If editing, only show business form
 
   // Load business data if editing
   useEffect(() => {
@@ -108,6 +120,78 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
       setMaxAdmins(currentBusiness.max_admins || null);
     }
   }, [businessId, currentBusiness]);
+
+  // Fetch avatars for selection
+  useEffect(() => {
+    let isMounted = true;
+    setAvatarsLoading(true);
+    setAvatarsError(null);
+
+    getAllAvatars()
+      .then((result) => {
+        if (!isMounted) return;
+        if (result.success) {
+          const avatarsList = Array.isArray(result.data)
+            ? result.data
+            : result.data?.results || [];
+          setAvatars(avatarsList);
+        } else {
+          setAvatarsError(result.error);
+        }
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        setAvatarsError(error?.message || error);
+      })
+      .finally(() => {
+        if (isMounted) setAvatarsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch existing business avatar config when editing
+  useEffect(() => {
+    if (!businessId) return;
+    let isMounted = true;
+
+    getBusinessAvatarConfig(businessId)
+      .then((result) => {
+        if (!isMounted || !result.success) return;
+        const config = result.data?.config || result.data;
+        const value =
+          config?.avatar_id ||
+          config?.avatar_uuid ||
+          config?.avatar?.id ||
+          config?.avatar?.uuid_heygen ||
+          null;
+        if (value) {
+          setAvatarConfigValue(value);
+        }
+      })
+      .catch(() => {
+        if (!isMounted) return;
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [businessId]);
+
+  // Match config value to avatar list when both are available
+  useEffect(() => {
+    if (!avatarConfigValue || selectedAvatarId || avatars.length === 0) return;
+    const match = avatars.find(
+      (avatar) =>
+        String(avatar.id) === String(avatarConfigValue) ||
+        String(avatar.uuid_heygen) === String(avatarConfigValue)
+    );
+    if (match) {
+      setSelectedAvatarId(match.id);
+    }
+  }, [avatarConfigValue, avatars, selectedAvatarId]);
 
   // Fetch clients when business is created and we're on step 2
   useEffect(() => {
@@ -186,6 +270,43 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
+  };
+
+  const handleSaveAvatarConfig = async () => {
+    const targetBusinessId = businessId || createdBusinessId;
+    if (!targetBusinessId) {
+      alert(
+        t("messages.businessNotCreated") || "Business must be created first"
+      );
+      return;
+    }
+    if (!selectedAvatarId) {
+      alert(t("messages.selectAvatar") || "Please select an avatar");
+      return;
+    }
+
+    setIsSavingAvatar(true);
+    try {
+      const result = await createBusinessAvatarConfig({
+        businessId: targetBusinessId,
+        avatarId: selectedAvatarId,
+      });
+      if (!result.success) {
+        throw new Error(result.error || "Failed to save avatar config");
+      }
+      alert(
+        t("messages.avatarConfigSaved") ||
+          "Avatar configuration saved successfully"
+      );
+    } catch (error) {
+      alert(
+        error?.message ||
+          t("messages.avatarConfigFailed") ||
+          "Failed to save business avatar configuration"
+      );
+    } finally {
+      setIsSavingAvatar(false);
+    }
   };
 
   const addPaymentRow = () => {
@@ -299,6 +420,19 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
           throw new Error("Business ID is not a valid number");
         }
 
+        if (selectedAvatarId) {
+          const avatarConfigResult = await createBusinessAvatarConfig({
+            businessId: businessIdNum,
+            avatarId: selectedAvatarId,
+          });
+          if (!avatarConfigResult.success) {
+            alert(
+              t("messages.avatarConfigFailed") ||
+                "Failed to save business avatar configuration"
+            );
+          }
+        }
+
         // Store business ID from step 1 to use in POST requests for clients, admins, and payments
         setCreatedBusinessId(businessIdNum);
         setCurrentStep(2);
@@ -334,6 +468,15 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
       }
       // Validate admins (optional step - can skip)
       setCurrentStep(4);
+    } else if (currentStep === 4) {
+      // Validate that business was created before moving to avatar step
+      if (!createdBusinessId) {
+        alert(
+          t("messages.businessNotCreated") || "Business must be created first"
+        );
+        return;
+      }
+      setCurrentStep(5);
     }
   };
 
@@ -404,6 +547,19 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
         const result = await dispatch(
           editBusiness({ businessId, businessData: submitData })
         ).unwrap();
+
+        if (selectedAvatarId) {
+          const avatarConfigResult = await createBusinessAvatarConfig({
+            businessId,
+            avatarId: selectedAvatarId,
+          });
+          if (!avatarConfigResult.success) {
+            alert(
+              t("messages.avatarConfigFailed") ||
+                "Failed to save business avatar configuration"
+            );
+          }
+        }
 
         if (onSuccess) {
           onSuccess(result);
@@ -517,6 +673,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
         t("business.step2Title") || "Add Clients",
         t("business.step3Title") || "Add Admins",
         t("business.step4Title") || "Add Payments",
+        t("business.step5Title") || "Choose Avatar",
       ];
 
   return (
@@ -551,7 +708,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
 
       {/* Step Indicator */}
       {!businessId && (
-        <div className="mb-8">
+        <div className="mb-8 mt-4">
           <div className="flex items-center justify-between mb-4">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
@@ -566,21 +723,21 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                       className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
                         isCompleted
-                          ? "bg-primary-DEFAULT border-primary-DEFAULT text-white"
+                          ? "bg-primary-default border-primary-default text-white"
                           : isActive
                           ? "bg-primary-dark border-primary-dark text-white"
                           : "bg-gray-200 border-gray-300 text-gray-500"
                       )}
                     >
                       {isCompleted ? (
-                        <CheckCircle2 className="w-6 h-6" />
+                        <span className="font-semibold">{stepNumber}</span>
                       ) : (
                         <span className="font-semibold">{stepNumber}</span>
                       )}
                     </div>
                     <div
                       className={cn(
-                        "mt-2 text-sm font-medium text-center max-w-[120px]",
+                        "mt-2 text-sm font-medium text-center",
                         isActive || isCompleted
                           ? "text-gray-900"
                           : "text-gray-400"
@@ -589,14 +746,6 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                       {title}
                     </div>
                   </div>
-                  {!isLast && (
-                    <div
-                      className={cn(
-                        "h-0.5 flex-1 mx-2 -mt-5 transition-colors",
-                        isCompleted ? "bg-green-500" : "bg-gray-300"
-                      )}
-                    />
-                  )}
                 </div>
               );
             })}
@@ -818,6 +967,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         )}
@@ -1144,6 +1294,163 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
             >
               {t("buttons.addPayment") || "Add Another Payment"}
             </Button>
+          </div>
+        )}
+
+        {/* Step 5: Choose Avatar */}
+        {currentStep === 5 && !businessId && (
+          <div className="space-y-6 pb-4">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {t("business.step5Title") || "Choose Avatar"}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {t("business.step5Description") ||
+                  "Select an avatar for this business"}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/50 p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-3 mb-5">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    {t("business.avatarTitle") || "Business Avatar"}
+                  </h4>
+                </div>
+                {selectedAvatarId && (
+                  <span className="text-[11px] px-3 py-1.5 rounded-full bg-primary-dark text-white font-medium shadow-sm mb-2">
+                    <CheckCircle2 className="w-3 h-3 inline-block mr-2" />
+                    {t("business.avatarSelectedLabel") || "Selected"}
+                  </span>
+                )}
+              </div>
+
+              {avatarsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary-dark border-r-transparent mb-3"></div>
+                    <p className="text-sm text-gray-500">
+                      {t("messages.loading") || "Loading..."}
+                    </p>
+                  </div>
+                </div>
+              ) : avatarsError ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-3">
+                      <X className="w-6 h-6 text-red-600" />
+                    </div>
+                    <p className="text-sm text-red-600">
+                      {t("messages.failedToLoadAvatars") || "Failed to load avatars"}
+                    </p>
+                  </div>
+                </div>
+              ) : avatars.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {avatars.map((avatar) => {
+                    const isSelected = String(selectedAvatarId) === String(avatar.id);
+                    return (
+                      <button
+                        type="button"
+                        key={avatar.id}
+                        onClick={() => setSelectedAvatarId(avatar.id)}
+                        className={cn(
+                          "group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md",
+                          isSelected
+                            ? "border-primary-dark bg-primary-dark/5 shadow-md scale-105"
+                            : "border-gray-200 hover:border-primary-dark/50 hover:bg-gray-50"
+                        )}
+                        aria-pressed={isSelected}
+                        aria-label={avatar.name || "Avatar"}
+                      >
+                        
+                        <div
+                          className={cn(
+                            "w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200",
+                            isSelected
+                              ? "border-primary-dark shadow-lg"
+                              : "border-gray-300 group-hover:border-primary-dark/50"
+                          )}
+                        >
+                          {avatar.preview_url ? (
+                            <img
+                              src={avatar.preview_url}
+                              alt={avatar.name || "Avatar"}
+                              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-sm font-semibold text-gray-600">
+                              {(avatar.name || "A").slice(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <span
+                          className={cn(
+                            "text-xs font-medium text-center line-clamp-2 transition-colors duration-200",
+                            isSelected
+                              ? "text-primary-dark"
+                              : "text-gray-700 group-hover:text-primary-dark"
+                          )}
+                        >
+                          {avatar.name || "-"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                      <X className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {t("messages.noAvatars") || "No avatars available"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 pt-5 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    {businessId || createdBusinessId
+                      ? t("business.avatarSaveHint") || "Save your avatar selection for this business"
+                      : t("business.avatarSaveDisabled") || "You can save the avatar after creating the business"}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="dark"
+                  onClick={handleSaveAvatarConfig}
+                  disabled={
+                    isSavingAvatar ||
+                    !selectedAvatarId ||
+                    !(businessId || createdBusinessId)
+                  }
+                  className="sm:ml-auto font-medium px-3 py-3 shadow-sm hover:shadow-md transition-shadow duration-200 disabled:cursor-not-allowed mt-4"
+                >
+                  {isSavingAvatar ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {t("buttons.saving") || "Saving..."}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2 inline-block" />
+                      {t("buttons.saveAvatar") || "Save Avatar"}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 

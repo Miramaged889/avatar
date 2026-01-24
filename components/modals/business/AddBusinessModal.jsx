@@ -31,7 +31,7 @@ export function AddBusinessModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
-        <DialogTitle className="sr-only">
+        {/* <DialogTitle className="sr-only">
           {businessId
             ? t("modals.editBusiness") || "Edit Business"
             : t("modals.addBusiness") || "Add Business"}
@@ -42,7 +42,7 @@ export function AddBusinessModal({
               "Update business information"
             : t("modals.addBusinessDescription") ||
               "Fill the information below to add a new business"}
-        </DialogDescription>
+        </DialogDescription> */}
         <AddBusinessForm
           businessId={businessId}
           onSuccess={handleSuccess}
