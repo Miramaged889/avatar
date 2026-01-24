@@ -323,8 +323,6 @@
   },
   "messages": {
     "saveSuccess": "تمت إضافة العميل بنجاح!",
-    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
-    "profileUpdateFailed": "فشل تحديث الملف الشخصي",
     "loginSuccess": "تم تسجيل الدخول بنجاح!",
     "loginFailed": "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد.",
     "forgotPassword": "نسيت كلمة المرور؟",
@@ -333,10 +331,8 @@
     "maxFileSize": "الحد الأقصى لحجم الملف حتى 1 جيجابايت",
     "noFileChosen": "لم يتم اختيار ملف",
     "fillRequiredFields": "يرجى ملء جميع الحقول المطلوبة",
-    "requiredField": "هذه الخانة مطلوبة",
     "devicesRange": "يجب أن يكون عدد الأجهزة بين 0 و 50",
     "saveFailed": "فشل الحفظ",
-    "loadProfileFailed": "فشل تحميل معلومات الحساب",
     "loading": "جاري التحميل...",
     "noBusinesses": "لم يتم العثور على أعمال",
     "businessNotCreated": "يجب إنشاء العمل أولاً",
@@ -488,10 +484,8 @@
       "title": "حالة الحساب",
       "status": "الحالة",
       "active": "نشط",
-      "inactive": "غير نشط",
       "memberSince": "عضو منذ",
-      "lastLogin": "آخر تسجيل دخول",
-      "neverLoggedIn": "لم يسجّل الدخول بعد"
+      "lastLogin": "آخر تسجيل دخول"
     }
   },
   "admin": {

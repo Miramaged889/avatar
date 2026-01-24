@@ -39,7 +39,6 @@ import { cn } from "../../../components/utils/cn";
 import {
   changeSuperuserPassword,
   getSuperuserMe,
-  updateSuperuserMe,
 } from "../../../lib/api/authApi";
 import {
   Avatar,
@@ -48,18 +47,12 @@ import {
 } from "../../../components/shadcn/AvatarWrapper";
 
 export default function SettingsPage() {
-  const { t, isRTL, locale, setLocale } = useLocale();
+  const { t, isRTL, locale, setLocale, formatDate } = useLocale();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState({
-    currentPassword: [],
-    newPassword: [],
-    confirmPassword: [],
-  });
 
   const [settings, setSettings] = useState({
     // Profile
@@ -67,8 +60,6 @@ export default function SettingsPage() {
     lastName: "",
     username: "",
     email: "",
-    phone: "",
-    company: "",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
 
     // Security
@@ -84,16 +75,6 @@ export default function SettingsPage() {
 
   const handleChange = (field, value) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
-    if (
-      field === "currentPassword" ||
-      field === "newPassword" ||
-      field === "confirmPassword"
-    ) {
-      setPasswordErrors((prev) => ({
-        ...prev,
-        [field]: [],
-      }));
-    }
   };
 
   const handleSave = (section) => {
@@ -101,91 +82,17 @@ export default function SettingsPage() {
     // Add save logic here
   };
 
-  const handleProfileSave = async () => {
-    if (isSavingProfile) {
-      return;
-    }
-
-    if (!settings.username || !settings.email) {
-      alert(
-        t("messages.fillRequiredFields") || "Please fill in all required fields"
-      );
-      return;
-    }
-
-    setIsSavingProfile(true);
-    try {
-      const result = await updateSuperuserMe({
-        first_name: settings.firstName || "",
-        last_name: settings.lastName || "",
-        username: settings.username,
-        email: settings.email,
-      });
-
-      if (result.success) {
-        const data = result.data || {};
-        setSettings((prev) => ({
-          ...prev,
-          firstName: data.first_name ?? prev.firstName,
-          lastName: data.last_name ?? prev.lastName,
-          username: data.username ?? prev.username,
-          email: data.email ?? prev.email,
-        }));
-        alert(
-          t("messages.profileUpdated") || "Profile updated successfully"
-        );
+  useEffect(() => {
+    let isMounted = true;
+    const loadAccountInfo = async () => {
+      const result = await getSuperuserMe();
+      if (!isMounted) {
         return;
       }
 
-      const err = result.error;
-      let errorMessage =
-        t("messages.profileUpdateFailed") || "Failed to update profile";
-
-      if (err?.username) {
-        errorMessage = Array.isArray(err.username)
-          ? err.username.join(", ")
-          : err.username;
-      } else if (err?.email) {
-        errorMessage = Array.isArray(err.email)
-          ? err.email.join(", ")
-          : err.email;
-      } else if (err?.first_name) {
-        errorMessage = Array.isArray(err.first_name)
-          ? err.first_name.join(", ")
-          : err.first_name;
-      } else if (err?.last_name) {
-        errorMessage = Array.isArray(err.last_name)
-          ? err.last_name.join(", ")
-          : err.last_name;
-      } else if (err?.detail) {
-        errorMessage =
-          typeof err.detail === "string"
-            ? err.detail
-            : Array.isArray(err.detail)
-            ? err.detail.join(", ")
-            : JSON.stringify(err.detail);
-      } else if (typeof err === "string") {
-        errorMessage = err;
-      } else if (err?.message) {
-        errorMessage = err.message;
-      }
-
-      alert(errorMessage);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert(t("messages.profileUpdateFailed") || "Failed to update profile");
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
-
-  useEffect(() => {
-    const loadAccountInfo = async () => {
-      const result = await getSuperuserMe();
       if (!result.success) {
         const err = result.error;
-        let errorMessage =
-          t("messages.loadProfileFailed") || "Failed to load account info";
+        let errorMessage = "Failed to load account info";
 
         if (err?.detail) {
           errorMessage =
@@ -204,11 +111,11 @@ export default function SettingsPage() {
         return;
       }
 
-      const data = result.data;
+      const data = result.data || {};
       const derivedName =
         [data.first_name, data.last_name].filter(Boolean).join(" ") ||
         data.username ||
-        "";
+        "Admin";
 
       setSettings((prev) => ({
         ...prev,
@@ -222,63 +129,46 @@ export default function SettingsPage() {
         avatar:
           prev.avatar ||
           `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
-            derivedName || "Admin"
+            derivedName
           )}`,
       }));
     };
 
     loadAccountInfo();
-  }, [t]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handlePasswordUpdate = async () => {
     if (isUpdatingPassword) {
       return;
     }
 
-    const nextErrors = {
-      currentPassword: [],
-      newPassword: [],
-      confirmPassword: [],
-    };
-
     if (
       !settings.currentPassword ||
       !settings.newPassword ||
       !settings.confirmPassword
     ) {
-      const requiredMessage =
-        t("messages.requiredField") || "This field is required";
-      if (!settings.currentPassword) {
-        nextErrors.currentPassword.push(requiredMessage);
-      }
-      if (!settings.newPassword) {
-        nextErrors.newPassword.push(requiredMessage);
-      }
-      if (!settings.confirmPassword) {
-        nextErrors.confirmPassword.push(requiredMessage);
-      }
+      alert(
+        t("messages.fillRequiredFields") || "Please fill in all required fields"
+      );
+      return;
     }
 
     if (settings.newPassword !== settings.confirmPassword) {
-      nextErrors.confirmPassword.push(
+      alert(
         t("messages.passwordsDoNotMatch") ||
           "New password and confirmation do not match"
       );
+      return;
     }
 
     if (settings.newPassword.length < 6) {
-      nextErrors.newPassword.push(
+      alert(
         t("messages.passwordMinLength") ||
           "Password must be at least 6 characters"
       );
-    }
-
-    if (
-      nextErrors.currentPassword.length > 0 ||
-      nextErrors.newPassword.length > 0 ||
-      nextErrors.confirmPassword.length > 0
-    ) {
-      setPasswordErrors(nextErrors);
       return;
     }
 
@@ -300,70 +190,44 @@ export default function SettingsPage() {
           newPassword: "",
           confirmPassword: "",
         }));
-        setPasswordErrors({
-          currentPassword: [],
-          newPassword: [],
-          confirmPassword: [],
-        });
         return;
       }
 
       const err = result.error;
-      const apiErrors = {
-        currentPassword: [],
-        newPassword: [],
-        confirmPassword: [],
-      };
-      const normalizeErrors = (value) =>
-        Array.isArray(value) ? value : value ? [value] : [];
+      let errorMessage =
+        t("messages.passwordUpdateFailed") || "Failed to update password";
 
-      if (err?.non_field_errors) {
-        apiErrors.newPassword.push(...normalizeErrors(err.non_field_errors));
-      }
       if (err?.old_password) {
-        apiErrors.currentPassword.push(...normalizeErrors(err.old_password));
-      }
-      if (err?.new_password) {
-        apiErrors.newPassword.push(...normalizeErrors(err.new_password));
-      }
-      if (err?.confirm_new_password) {
-        apiErrors.confirmPassword.push(
-          ...normalizeErrors(err.confirm_new_password)
-        );
-      }
-
-      if (err?.detail) {
-        apiErrors.newPassword.push(
-          ...(normalizeErrors(err.detail).map((item) =>
-            typeof item === "string" ? item : JSON.stringify(item)
-          ))
-        );
+        errorMessage = Array.isArray(err.old_password)
+          ? err.old_password.join(", ")
+          : err.old_password;
+      } else if (err?.new_password) {
+        errorMessage = Array.isArray(err.new_password)
+          ? err.new_password.join(", ")
+          : err.new_password;
+      } else if (err?.confirm_new_password) {
+        errorMessage = Array.isArray(err.confirm_new_password)
+          ? err.confirm_new_password.join(", ")
+          : err.confirm_new_password;
+      } else if (err?.detail) {
+        errorMessage =
+          typeof err.detail === "string"
+            ? err.detail
+            : Array.isArray(err.detail)
+            ? err.detail.join(", ")
+            : JSON.stringify(err.detail);
       } else if (typeof err === "string") {
-        apiErrors.newPassword.push(err);
+        errorMessage = err;
       } else if (err?.message) {
-        apiErrors.newPassword.push(err.message);
+        errorMessage = err.message;
       }
 
-      if (
-        apiErrors.currentPassword.length === 0 &&
-        apiErrors.newPassword.length === 0 &&
-        apiErrors.confirmPassword.length === 0
-      ) {
-        apiErrors.newPassword.push(
-          t("messages.passwordUpdateFailed") || "Failed to update password"
-        );
-      }
-
-      setPasswordErrors(apiErrors);
+      alert(errorMessage);
     } catch (error) {
       console.error("Error updating password:", error);
-      setPasswordErrors({
-        currentPassword: [],
-        newPassword: [
-          t("messages.passwordUpdateFailed") || "Failed to update password",
-        ],
-        confirmPassword: [],
-      });
+      alert(
+        t("messages.passwordUpdateFailed") || "Failed to update password"
+      );
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -404,20 +268,10 @@ export default function SettingsPage() {
     [settings.firstName, settings.lastName].filter(Boolean).join(" ") ||
     settings.username ||
     "Admin";
-  const localeForDate = locale === "ar" ? "ar" : "en";
-  const formatDate = (value) => {
-    if (!value) {
-      return "-";
-    }
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return "-";
-    }
-    return new Intl.DateTimeFormat(localeForDate, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(parsed);
+  const inactiveLabel = locale === "ar" ? "غير نشط" : "Inactive";
+  const formatAccountDate = (value) => {
+    const formatted = formatDate(value);
+    return formatted || "-";
   };
 
   return (
@@ -494,21 +348,21 @@ export default function SettingsPage() {
                   name="firstName"
                   value={settings.firstName}
                   onChange={(e) => handleChange("firstName", e.target.value)}
-                  required
+                  disabled
                 />
                 <TextInput
                   label={t("settings.profile.lastName")}
                   name="lastName"
                   value={settings.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  required
+                  disabled
                 />
                 <TextInput
                   label={t("settings.profile.username")}
                   name="username"
                   value={settings.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  required
+                  disabled
                 />
                 <TextInput
                   label={t("settings.profile.emailAddress")}
@@ -516,24 +370,8 @@ export default function SettingsPage() {
                   type="email"
                   value={settings.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  required
+                  disabled
                 />
-              </div>
-
-              <div
-                className={cn(
-                  "flex justify-end pt-4",
-                  isRTL && "justify-start"
-                )}
-              >
-                <Button
-                  onClick={handleProfileSave}
-                  className="flex items-center gap-2"
-                  disabled={isSavingProfile}
-                >
-                  <Save className="h-4 w-4" />
-                  {t("settings.profile.saveChanges")}
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -566,7 +404,6 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("currentPassword", e.target.value)
                     }
-                    error={passwordErrors.currentPassword}
                     required
                   />
                   <button
@@ -594,7 +431,6 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("newPassword", e.target.value)
                     }
-                    error={passwordErrors.newPassword}
                     required
                   />
                   <button
@@ -622,7 +458,6 @@ export default function SettingsPage() {
                     onChange={(e) =>
                       handleChange("confirmPassword", e.target.value)
                     }
-                    error={passwordErrors.confirmPassword}
                     required
                   />
                   <button
@@ -886,7 +721,7 @@ export default function SettingsPage() {
                 >
                   {settings.isActive
                     ? t("settings.accountStatus.active")
-                    : t("settings.accountStatus.inactive")}
+                    : inactiveLabel}
                 </span>
               </div>
               <div
@@ -899,7 +734,7 @@ export default function SettingsPage() {
                   {t("settings.accountStatus.memberSince")}
                 </span>
                 <span className="text-sm font-medium">
-                  {formatDate(settings.dateJoined)}
+                  {formatAccountDate(settings.dateJoined)}
                 </span>
               </div>
               <div
@@ -912,9 +747,7 @@ export default function SettingsPage() {
                   {t("settings.accountStatus.lastLogin")}
                 </span>
                 <span className="text-sm font-medium">
-                  {settings.lastLogin
-                    ? formatDate(settings.lastLogin)
-                    : t("settings.accountStatus.neverLoggedIn")}
+                  {formatAccountDate(settings.lastLogin)}
                 </span>
               </div>
             </CardContent>

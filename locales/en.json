@@ -324,8 +324,6 @@
   },
   "messages": {
     "saveSuccess": "Customer added successfully!",
-    "profileUpdated": "Profile updated successfully",
-    "profileUpdateFailed": "Failed to update profile",
     "loginSuccess": "Logged in successfully!",
     "loginFailed": "Login failed. Please check your credentials.",
     "forgotPassword": "Forgot your password?",
@@ -334,10 +332,8 @@
     "maxFileSize": "Max file size up to 1 GB",
     "noFileChosen": "No file chosen",
     "fillRequiredFields": "Please fill in all required fields",
-    "requiredField": "This field is required",
     "devicesRange": "Number of devices must be between 0 and 50",
     "saveFailed": "Save failed",
-    "loadProfileFailed": "Failed to load account info",
     "loading": "Loading...",
     "noBusinesses": "No businesses found",
     "businessNotCreated": "Business must be created first",
@@ -487,10 +483,8 @@
       "title": "Account Status",
       "status": "Status",
       "active": "Active",
-      "inactive": "Inactive",
       "memberSince": "Member Since",
-      "lastLogin": "Last Login",
-      "neverLoggedIn": "Never logged in"
+      "lastLogin": "Last Login"
     }
   },
   "admin": {
