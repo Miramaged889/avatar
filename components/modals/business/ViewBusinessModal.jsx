@@ -11,10 +11,15 @@ import { useLocale } from "../../utils/useLocale";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "../../shadcn/ButtonWrapper";
 import { Badge } from "../../shadcn/BadgeWrapper";
-import { X, Plus, Edit, Trash2, AlertCircle } from "lucide-react";
+import { X, Plus, Edit, Trash2, AlertCircle, CheckCircle2, Image } from "lucide-react";
 import { getAllClients } from "../../../lib/api/clientApi";
 import { getAllAdmins } from "../../../lib/api/adminApi";
 import { getAllPayments } from "../../../lib/api/paymentApi";
+import {
+  getAllAvatars,
+  getBusinessAvatarConfig,
+  createBusinessAvatarConfig,
+} from "../../../lib/api/avatarApi";
 import { removeClient } from "../../../lib/store/slices/clientSlice";
 import { AddClientForm } from "../../../forms/AddClientForm";
 import { removeAdmin } from "../../../lib/store/slices/adminSlice";
@@ -41,6 +46,12 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
   const [selectedAdminId, setSelectedAdminId] = useState(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
+  const [avatars, setAvatars] = useState([]);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [tempSelectedAvatarId, setTempSelectedAvatarId] = useState(null);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
 
   // Function to fetch clients
   const fetchClients = () => {
@@ -112,12 +123,76 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
       });
   };
 
-  // Fetch clients, admins, and payments when businessId changes
+  // Function to fetch avatar config
+  const fetchAvatarConfig = () => {
+    if (!businessId) return;
+
+    setLoadingAvatar(true);
+    getBusinessAvatarConfig(businessId)
+      .then((result) => {
+        if (result.success) {
+          const config = result.data?.config || result.data;
+          const avatarId =
+            config?.avatar_id ||
+            config?.avatar_uuid ||
+            config?.avatar?.id ||
+            config?.avatar?.uuid_heygen ||
+            null;
+          if (avatarId) {
+            // Fetch all avatars to find the matching one
+            getAllAvatars().then((avatarsResult) => {
+              if (avatarsResult.success) {
+                const avatarsList = Array.isArray(avatarsResult.data)
+                  ? avatarsResult.data
+                  : avatarsResult.data?.results || [];
+                const matchedAvatar = avatarsList.find(
+                  (avatar) =>
+                    String(avatar.id) === String(avatarId) ||
+                    String(avatar.uuid_heygen) === String(avatarId)
+                );
+                setSelectedAvatar(matchedAvatar || null);
+              }
+            });
+          } else {
+            setSelectedAvatar(null);
+          }
+        } else {
+          setSelectedAvatar(null);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching avatar config:", error);
+        setSelectedAvatar(null);
+      })
+      .finally(() => {
+        setLoadingAvatar(false);
+      });
+  };
+
+  // Function to fetch all avatars for selection
+  const fetchAvatars = () => {
+    getAllAvatars()
+      .then((result) => {
+        if (result.success) {
+          const avatarsList = Array.isArray(result.data)
+            ? result.data
+            : result.data?.results || [];
+          setAvatars(avatarsList);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching avatars:", error);
+      });
+  };
+
+  // Fetch clients, admins, payments, and avatar when businessId changes
   useEffect(() => {
     if (open && businessId) {
       fetchClients();
       fetchAdmins();
       fetchPayments();
+      fetchAvatarConfig();
+      fetchAvatars();
     } else {
       // Reset when modal closes
       setClients([]);
@@ -126,6 +201,8 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
       setSelectedClientId(null);
       setSelectedAdminId(null);
       setSelectedPaymentId(null);
+      setSelectedAvatar(null);
+      setTempSelectedAvatarId(null);
     }
   }, [open, businessId]);
 
@@ -277,6 +354,53 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
     setSelectedPaymentId(null);
   };
 
+  // Handle open avatar selection modal
+  const handleOpenAvatarModal = () => {
+    setTempSelectedAvatarId(selectedAvatar?.id || null);
+    setIsAvatarModalOpen(true);
+  };
+
+  // Handle close avatar selection modal
+  const handleCloseAvatarModal = () => {
+    setIsAvatarModalOpen(false);
+    setTempSelectedAvatarId(null);
+  };
+
+  // Handle save avatar selection
+  const handleSaveAvatar = async () => {
+    if (!tempSelectedAvatarId || !businessId) {
+      alert(t("messages.selectAvatar") || "Please select an avatar");
+      return;
+    }
+
+    setIsSavingAvatar(true);
+    try {
+      const result = await createBusinessAvatarConfig({
+        businessId: businessId,
+        avatarId: tempSelectedAvatarId,
+      });
+
+      if (result.success) {
+        alert(
+          t("messages.avatarConfigSaved") ||
+            "Avatar configuration saved successfully"
+        );
+        fetchAvatarConfig(); // Refresh avatar display
+        handleCloseAvatarModal();
+      } else {
+        throw new Error(result.error || "Failed to save avatar config");
+      }
+    } catch (error) {
+      console.error("Error saving avatar:", error);
+      alert(
+        t("messages.avatarConfigFailed") ||
+          "Failed to save business avatar configuration"
+      );
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     try {
@@ -339,6 +463,92 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
 
         {!loading && currentBusiness && (
           <div className="space-y-6">
+            {/* Avatar Section */}
+            <div className="space-y-4 border-b pb-4">
+              <div
+                className={cn(
+                  "flex items-center justify-between",
+                  isRTL && "flex-row"
+                )}
+              >
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t("business.avatar") || "Business Avatar"}
+                </h3>
+                {!selectedAvatar && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenAvatarModal}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t("buttons.chooseAvatar") || "Choose Avatar"}
+                  </Button>
+                )}
+              </div>
+
+              {loadingAvatar ? (
+                <div className="text-center py-8 text-gray-500">
+                  {t("messages.loading") || "Loading..."}
+                </div>
+              ) : selectedAvatar ? (
+                <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-primary-dark shadow-md">
+                      {selectedAvatar.preview_url ? (
+                        <img
+                          src={selectedAvatar.preview_url}
+                          alt={selectedAvatar.name || "Avatar"}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-lg font-semibold text-gray-600">
+                          {(selectedAvatar.name || "A").slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute -top-1 -right-1 bg-primary-dark text-white rounded-full p-1">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-base font-semibold text-gray-900">
+                      {selectedAvatar.name || "-"}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {t("business.avatarSelected") || "Avatar selected"}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenAvatarModal}
+                    className="flex items-center gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    {t("buttons.changeAvatar") || "Change Avatar"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-8 border border-gray-200 rounded-lg bg-gray-50">
+                  <Image className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500 mb-4">
+                    {t("messages.noAvatarSelected") ||
+                      "No avatar selected for this business"}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleOpenAvatarModal}
+                    className="flex items-center gap-2 mx-auto"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t("buttons.chooseAvatar") || "Choose Avatar"}
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {/* Business Information Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
@@ -984,6 +1194,141 @@ export function ViewBusinessModal({ open, onOpenChange, businessId }) {
               onCancel={handlePaymentModalClose}
               businessId={businessId} // Pass businessId to pre-fill the form
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Avatar Selection Modal */}
+      <Dialog open={isAvatarModalOpen} onOpenChange={handleCloseAvatarModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <DialogTitle>
+              {t("business.chooseAvatar") || "Choose Business Avatar"}
+            </DialogTitle>
+            <button
+              type="button"
+              className="ml-4 text-gray-400 hover:text-gray-600 transition"
+              onClick={handleCloseAvatarModal}
+              aria-label={t("buttons.close") || "Close"}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <DialogDescription>
+            {t("business.avatarSelectionDescription") ||
+              "Select an avatar for this business"}
+          </DialogDescription>
+
+          {avatars.length > 0 ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {avatars.map((avatar) => {
+                  const isSelected =
+                    String(tempSelectedAvatarId) === String(avatar.id);
+                  return (
+                    <button
+                      type="button"
+                      key={avatar.id}
+                      onClick={() => setTempSelectedAvatarId(avatar.id)}
+                      className={cn(
+                        "group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md",
+                        isSelected
+                          ? "border-primary-dark bg-primary-dark/5 shadow-md scale-105"
+                          : "border-gray-200 hover:border-primary-dark/50 hover:bg-gray-50"
+                      )}
+                      aria-pressed={isSelected}
+                      aria-label={avatar.name || "Avatar"}
+                    >
+                      <div
+                        className={cn(
+                          "w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200",
+                          isSelected
+                            ? "border-primary-dark shadow-lg"
+                            : "border-gray-300 group-hover:border-primary-dark/50"
+                        )}
+                      >
+                        {avatar.preview_url ? (
+                          <img
+                            src={avatar.preview_url}
+                            alt={avatar.name || "Avatar"}
+                            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-sm font-semibold text-gray-600">
+                            {(avatar.name || "A")
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <span
+                        className={cn(
+                          "text-xs font-medium text-center line-clamp-2 transition-colors duration-200",
+                          isSelected
+                            ? "text-primary-dark"
+                            : "text-gray-700 group-hover:text-primary-dark"
+                        )}
+                      >
+                        {avatar.name || "-"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end pt-4 border-t">
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="py-3 px-4"
+                    onClick={handleCloseAvatarModal}
+                    disabled={isSavingAvatar}
+                  >
+                    {t("buttons.cancel") || "Cancel"}
+                  </Button>
+                  <Button
+                    variant="dark"
+                    className="py-3 px-4"
+                    onClick={handleSaveAvatar}
+                    disabled={isSavingAvatar || !tempSelectedAvatarId}
+                  >
+                    {isSavingAvatar ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        {t("buttons.saving") || "Saving..."}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        {t("buttons.saveAvatar") || "Save Avatar"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              {t("messages.noAvatars") || "No avatars available"}
+            </div>
           )}
         </DialogContent>
       </Dialog>

@@ -678,37 +678,10 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-1">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {businessId
-                ? t("modals.editBusiness") || "Edit Business"
-                : t("modals.addBusiness") || "Add Business"}
-            </h2>
-            <p className="text-sm text-gray-500">
-              {businessId
-                ? t("modals.editBusinessDescription") ||
-                  "Update business information"
-                : t("modals.addBusinessDescription") ||
-                  "Fill the information below to add a new business"}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="ml-4 p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-            aria-label="Close form"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
 
       {/* Step Indicator */}
       {!businessId && (
-        <div className="mb-8 mt-4">
+        <div className="mb-2 mt-2">
           <div className="flex items-center justify-between mb-4">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
