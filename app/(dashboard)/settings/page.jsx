@@ -33,6 +33,8 @@ import {
   EyeOff,
   Download,
   Trash2,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { useLocale } from "../../../components/utils/useLocale";
 import { cn } from "../../../components/utils/cn";
@@ -55,6 +57,7 @@ export default function SettingsPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const [settings, setSettings] = useState({
     // Profile
@@ -264,19 +267,22 @@ export default function SettingsPage() {
       return;
     }
 
+    // Clear previous errors
+    setPasswordError("");
+
     if (
       !settings.currentPassword ||
       !settings.newPassword ||
       !settings.confirmPassword
     ) {
-      alert(
+      setPasswordError(
         t("messages.fillRequiredFields") || "Please fill in all required fields"
       );
       return;
     }
 
     if (settings.newPassword !== settings.confirmPassword) {
-      alert(
+      setPasswordError(
         t("messages.passwordsDoNotMatch") ||
           "New password and confirmation do not match"
       );
@@ -284,7 +290,7 @@ export default function SettingsPage() {
     }
 
     if (settings.newPassword.length < 6) {
-      alert(
+      setPasswordError(
         t("messages.passwordMinLength") ||
           "Password must be at least 6 characters"
       );
@@ -309,6 +315,7 @@ export default function SettingsPage() {
           newPassword: "",
           confirmPassword: "",
         }));
+        setPasswordError(""); // Clear any previous errors
         return;
       }
 
@@ -316,7 +323,14 @@ export default function SettingsPage() {
       let errorMessage =
         t("messages.passwordUpdateFailed") || "Failed to update password";
 
-      if (err?.old_password) {
+      // Handle non_field_errors first (common password validation errors)
+      if (err?.non_field_errors) {
+        if (Array.isArray(err.non_field_errors)) {
+          errorMessage = err.non_field_errors.join(". ");
+        } else {
+          errorMessage = err.non_field_errors;
+        }
+      } else if (err?.old_password) {
         errorMessage = Array.isArray(err.old_password)
           ? err.old_password.join(", ")
           : err.old_password;
@@ -341,10 +355,10 @@ export default function SettingsPage() {
         errorMessage = err.message;
       }
 
-      alert(errorMessage);
+      setPasswordError(errorMessage);
     } catch (error) {
       console.error("Error updating password:", error);
-      alert(
+      setPasswordError(
         t("messages.passwordUpdateFailed") || "Failed to update password"
       );
     } finally {
@@ -532,6 +546,39 @@ export default function SettingsPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Error Message */}
+              {passwordError && (
+                <div
+                  className={cn(
+                    "relative flex items-start gap-3 p-4 rounded-lg border-2 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
+                    "bg-red-50 border-red-300 shadow-sm",
+                    isRTL && "text-right"
+                  )}
+                  role="alert"
+                  aria-live="polite"
+                >
+                  <div className="flex-shrink-0 mt-0.5">
+                    <AlertCircle className="h-5 w-5 text-red-600" aria-hidden="true" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-red-900 leading-relaxed">
+                      {passwordError}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPasswordError("")}
+                    className={cn(
+                      "flex-shrink-0 text-red-400 hover:text-red-600 transition-colors",
+                      "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
+                    )}
+                    aria-label={t("buttons.close") || "Close error message"}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div className="relative">
                   <TextInput
@@ -539,9 +586,10 @@ export default function SettingsPage() {
                     name="currentPassword"
                     type={showPassword ? "text" : "password"}
                     value={settings.currentPassword}
-                    onChange={(e) =>
-                      handleChange("currentPassword", e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleChange("currentPassword", e.target.value);
+                      if (passwordError) setPasswordError(""); // Clear error when user types
+                    }}
                     required
                   />
                   <button
@@ -566,9 +614,10 @@ export default function SettingsPage() {
                     name="newPassword"
                     type={showNewPassword ? "text" : "password"}
                     value={settings.newPassword}
-                    onChange={(e) =>
-                      handleChange("newPassword", e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleChange("newPassword", e.target.value);
+                      if (passwordError) setPasswordError(""); // Clear error when user types
+                    }}
                     required
                   />
                   <button
@@ -593,9 +642,10 @@ export default function SettingsPage() {
                     name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={settings.confirmPassword}
-                    onChange={(e) =>
-                      handleChange("confirmPassword", e.target.value)
-                    }
+                    onChange={(e) => {
+                      handleChange("confirmPassword", e.target.value);
+                      if (passwordError) setPasswordError(""); // Clear error when user types
+                    }}
                     required
                   />
                   <button
