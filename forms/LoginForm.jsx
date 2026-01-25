@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "../components/shadcn/ButtonWrapper";
 import { useLocale } from "../components/utils/useLocale";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, X } from "lucide-react";
 import { cn } from "../components/utils/cn";
 import { superuserLogin } from "../lib/api/authApi";
 import { setAuthTokens } from "../lib/api/axios";
@@ -36,26 +36,88 @@ export function LoginForm() {
         // Redirect to dashboard
         router.push("/dashboard");
       } else {
-        // Handle error
-        const errorMessage =
-          result.error?.detail ||
-          result.error?.message ||
-          result.error ||
-          t("messages.loginFailed") ||
-          "Login failed. Please check your credentials.";
-        setError(
-          typeof errorMessage === "string"
-            ? errorMessage
-            : JSON.stringify(errorMessage)
-        );
+        // Handle error - extract meaningful error message
+        const err = result.error;
+        let errorMessage = t("messages.loginFailed") || "Login failed. Please check your credentials.";
+
+        // Handle different error formats
+        if (err) {
+          if (typeof err === "string") {
+            errorMessage = err;
+          } else if (err.detail) {
+            // Django REST framework error format
+            if (typeof err.detail === "string") {
+              errorMessage = err.detail;
+            } else if (Array.isArray(err.detail)) {
+              errorMessage = err.detail.join(", ");
+            } else {
+              errorMessage = JSON.stringify(err.detail);
+            }
+          } else if (err.message) {
+            errorMessage = err.message;
+          } else if (err.non_field_errors) {
+            // Field-specific errors
+            if (Array.isArray(err.non_field_errors)) {
+              errorMessage = err.non_field_errors.join(", ");
+            } else {
+              errorMessage = err.non_field_errors;
+            }
+          } else if (err.username || err.password) {
+            // Credential-specific errors
+            const credentialErrors = [];
+            if (err.username) {
+              credentialErrors.push(
+                Array.isArray(err.username) ? err.username.join(", ") : err.username
+              );
+            }
+            if (err.password) {
+              credentialErrors.push(
+                Array.isArray(err.password) ? err.password.join(", ") : err.password
+              );
+            }
+            if (credentialErrors.length > 0) {
+              errorMessage = credentialErrors.join(" ");
+            }
+          } else {
+            // Try to extract any error message from object
+            const errorKeys = Object.keys(err);
+            if (errorKeys.length > 0) {
+              const firstError = err[errorKeys[0]];
+              if (Array.isArray(firstError)) {
+                errorMessage = firstError[0];
+              } else if (typeof firstError === "string") {
+                errorMessage = firstError;
+              }
+            }
+          }
+        }
+
+        // Translate common error messages
+        const lowerError = errorMessage.toLowerCase();
+        if (lowerError.includes("invalid") || lowerError.includes("incorrect")) {
+          errorMessage = t("messages.invalidCredentials") || "Invalid username or password. Please try again.";
+        } else if (lowerError.includes("network") || lowerError.includes("connection") || lowerError.includes("timeout")) {
+          errorMessage = t("messages.networkError") || "Network error. Please check your connection and try again.";
+        } else if (lowerError.includes("required") || lowerError.includes("missing")) {
+          errorMessage = t("messages.requiredFields") || "Please fill in all required fields.";
+        }
+
+        setError(errorMessage);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(
-        err?.message ||
-          t("messages.loginFailed") ||
-          "An error occurred during login"
-      );
+      let errorMessage = t("messages.loginFailed") || "An error occurred during login";
+      
+      if (err?.message) {
+        const lowerError = err.message.toLowerCase();
+        if (lowerError.includes("network") || lowerError.includes("connection") || lowerError.includes("timeout")) {
+          errorMessage = t("messages.networkError") || "Network error. Please check your connection and try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -90,8 +152,34 @@ export function LoginForm() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-          {error}
+        <div
+          className={cn(
+            "relative flex items-start gap-3 p-4 rounded-lg border-2 transition-all duration-300 animate-in fade-in slide-in-from-top-2",
+            "bg-red-50 border-red-300 shadow-sm",
+            isRTL && "text-right"
+          )}
+          role="alert"
+          aria-live="polite"
+        >
+          <div className="flex-shrink-0 mt-0.5">
+            <AlertCircle className="h-5 w-5 text-red-600" aria-hidden="true" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-red-900 leading-relaxed">
+              {error}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError("")}
+            className={cn(
+              "flex-shrink-0 text-red-400 hover:text-red-600 transition-colors",
+              "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
+            )}
+            aria-label={t("buttons.close") || "Close error message"}
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 

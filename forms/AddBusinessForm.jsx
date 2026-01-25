@@ -1328,7 +1328,7 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                         key={avatar.id}
                         onClick={() => setSelectedAvatarId(avatar.id)}
                         className={cn(
-                          "group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md",
+                          "group relative flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md mb-4",
                           isSelected
                             ? "border-primary-dark bg-primary-dark/5 shadow-md scale-105"
                             : "border-gray-200 hover:border-primary-dark/50 hover:bg-gray-50"
