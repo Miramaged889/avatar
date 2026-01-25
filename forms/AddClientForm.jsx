@@ -268,7 +268,7 @@ export function AddClientForm({ clientId = null, businessId = null, onSuccess, o
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-6 mt-6">
+        <div className="flex gap-3 pt-6 mt-4">
           <Button
             type="button"
             variant="outline"

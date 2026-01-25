@@ -55,7 +55,10 @@ export function SelectInput({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 text-left"
+          className={cn(
+            "block text-sm font-medium text-gray-700",
+            isRTL ? "text-left" : "text-left"
+          )}
         >
           {displayLabel}
         </label>
@@ -74,15 +77,22 @@ export function SelectInput({
         <SelectTrigger
           id={inputId}
           name={name}
-          className="w-full border-gray-300 bg-white text-gray-900 text-left"
+          className={cn(
+            "w-full border-gray-300 bg-white text-gray-900",
+            isRTL ? "text-left flex-row-reverse" : "text-left flex-row"
+          )}
         >
           <SelectValue placeholder={displayPlaceholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className={cn(isRTL ? "text-right flex-row" : "text-left flex-row")}>
           {options
             .filter((option) => option.value !== "")
             .map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className={cn(isRTL ? "text-left flex-row-reverse" : "text-left flex-row")}
+              >
                 {option.label}
               </SelectItem>
             ))}

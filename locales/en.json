@@ -49,7 +49,8 @@
     "remove": "Remove",
     "next": "Next",
     "previous": "Previous",
-    "close": "Close"
+    "close": "Close",
+    "back": "Back"
   },
   "labels": {
     "email": "EMAIL ADDRESS",
@@ -93,7 +94,8 @@
     "login": "Login",
     "fullName": "Full Name",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "required": "Required"
   },
   "placeholders": {
     "email": "Enter your email address",
@@ -275,7 +277,8 @@
     "step2Title": "Answer Questions",
     "step2Description": "Please answer the following questions",
     "step3Title": "Upload Files",
-    "step3Description": "Upload relevant files (required)"
+    "step3Description": "Upload relevant files (required)",
+    "step3FileTypeNote": "Only .txt text files are allowed. Images and other file types are not permitted."
   },
   "payment": {
     "pageTitle": "Business Payments",
@@ -367,6 +370,7 @@
     "confirmDelete": "Are you sure you want to delete this business?",
     "confirmDeleteClient": "Are you sure you want to delete this client?",
     "confirmDeleteAnswer": "Are you sure you want to delete this answer?",
+    "confirmDeleteDocument": "Are you sure you want to delete this document?",
     "deleteFailed": "Failed to delete. Please try again.",
     "noPayments": "No payments found",
     "noPaymentsForBusiness": "No payments found for this business",
@@ -400,6 +404,7 @@
     "deleteClient": "Delete client",
     "viewDocument": "View document",
     "downloadDocument": "Download document",
+    "deleteDocument": "Delete document",
     "editAnswer": "Edit answer",
     "deleteAnswer": "Delete answer",  
     "editPaymentAria": "Edit payment",
@@ -407,7 +412,9 @@
     "editAdmin": "Edit admin",
     "deleteAdmin": "Delete admin",
     "previousPage": "Previous page",
-    "nextPage": "Next page"
+    "nextPage": "Next page",
+    "openSidebar": "Open sidebar",
+    "closeSidebar": "Close sidebar"
   },
   "language": {
     "english": "English",

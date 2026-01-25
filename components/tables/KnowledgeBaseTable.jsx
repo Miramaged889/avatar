@@ -14,6 +14,7 @@ export function KnowledgeBaseTable({
   businesses,
   onEditAnswer,
   onDeleteAnswer,
+  onDeleteDocument,
 }) {
   const { t, isRTL, locale } = useLocale();
   const [editingAnswer, setEditingAnswer] = useState(null);
@@ -229,6 +230,24 @@ export function KnowledgeBaseTable({
                       </Link>
                     </>
                   )}
+                  <button
+                    onClick={() => {
+                      if (
+                        confirm(
+                          t("messages.confirmDeleteDocument") ||
+                            "Are you sure you want to delete this document?"
+                        )
+                      ) {
+                        if (onDeleteDocument) {
+                          onDeleteDocument(doc.id);
+                        }
+                      }
+                    }}
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                    title={t("aria.deleteDocument") || "Delete document"}
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             ))}

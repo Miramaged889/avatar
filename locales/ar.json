@@ -49,7 +49,8 @@
     "addAdmin": "إضافة مشرف",
     "next": "التالي",
     "previous": "السابق",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "back": "رجوع"
   },
   "labels": {
     "email": "عنوان البريد الإلكتروني",
@@ -92,7 +93,8 @@
     "login": "تسجيل الدخول",
     "fullName": "الاسم الكامل",
     "active": "نشط",
-    "inactive": "غير نشط"
+    "inactive": "غير نشط",
+    "required": "مطلوب"
   },
   "placeholders": {
     "email": "ادخل عنوان البريد الإلكتروني",
@@ -274,7 +276,8 @@
     "step2Title": "الإجابة على الأسئلة",
     "step2Description": "يرجى الإجابة على الأسئلة التالية",
     "step3Title": "رفع الملفات",
-    "step3Description": "قم برفع الملفات ذات الصلة (مطلوب)"
+    "step3Description": "قم برفع الملفات ذات الصلة (مطلوب)",
+    "step3FileTypeNote": "يُسمح فقط بملفات النص .txt. الصور وأنواع الملفات الأخرى غير مسموحة."
   },
   "payment": {
     "pageTitle": "مدفوعات الأعمال",
@@ -366,6 +369,7 @@
     "confirmDelete": "هل أنت متأكد من حذف هذا العمل؟",
     "confirmDeleteClient": "هل أنت متأكد من حذف هذا العميل؟",
     "confirmDeleteAnswer": "هل أنت متأكد من حذف هذه الإجابة؟",
+    "confirmDeleteDocument": "هل أنت متأكد من حذف هذه الوثيقة؟",
     "deleteFailed": "فشل الحذف. يرجى المحاولة مرة أخرى.",
     "noPayments": "لم يتم العثور على مدفوعات",
     "noPaymentsForBusiness": "لم يتم العثور على مدفوعات لهذا العمل",
@@ -407,8 +411,11 @@
     "deletePaymentAria": "حذف دفعة",
     "viewDocument": "عرض الوثيقة",
     "downloadDocument": "تنزيل الوثيقة",
+    "deleteDocument": "حذف الوثيقة",
     "previousPage": "الصفحة السابقة",
-    "nextPage": "الصفحة التالية"
+    "nextPage": "الصفحة التالية",
+    "openSidebar": "فتح القائمة الجانبية",
+    "closeSidebar": "إغلاق القائمة الجانبية"
   },
   "language": {
     "english": "English",

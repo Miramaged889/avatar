@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { BusinessTable } from "../../../components/tables/BusinessTable";
 import { AddBusinessModal } from "../../../components/modals/business/AddBusinessModal";
-import { ViewBusinessModal } from "../../../components/modals/business/ViewBusinessModal";
 import { Button } from "../../../components/shadcn/ButtonWrapper";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "../../../components/utils/useLocale";
@@ -11,16 +11,14 @@ import { cn } from "../../../components/utils/cn";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllBusinesses,
-  fetchBusinessDetails,
 } from "../../../lib/store/slices/businessSlice";
 
 const ITEMS_PER_PAGE = 8;
 
 export default function BusinessPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
-  const [viewingBusinessId, setViewingBusinessId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { t, formatNumber, isRTL } = useLocale();
   const dispatch = useDispatch();
@@ -110,19 +108,12 @@ export default function BusinessPage() {
   };
 
   const handleView = (businessId) => {
-    setViewingBusinessId(businessId);
-    dispatch(fetchBusinessDetails(businessId));
-    setIsViewModalOpen(true);
+    router.push(`/business/${businessId}`);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedBusinessId(null);
-  };
-
-  const handleViewModalClose = () => {
-    setIsViewModalOpen(false);
-    setViewingBusinessId(null);
   };
 
   return (
@@ -276,13 +267,6 @@ export default function BusinessPage() {
         onOpenChange={handleModalClose}
         onSuccess={handleAddSuccess}
         businessId={selectedBusinessId}
-      />
-
-      {/* View Business Modal */}
-      <ViewBusinessModal
-        open={isViewModalOpen}
-        onOpenChange={handleViewModalClose}
-        businessId={viewingBusinessId}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import {
   fetchAllAnswers,
   fetchAllDocuments,
   deleteAnswer,
+  deleteDocument,
 } from "../../../lib/store/slices/knowledgeSlice";
 import { fetchAllBusinesses } from "../../../lib/store/slices/businessSlice";
 
@@ -215,6 +216,22 @@ export default function KnowledgeBasePage() {
               alert(
                 t("messages.deleteFailed") ||
                   "Failed to delete answer. Please try again."
+              );
+            }
+          }}
+          onDeleteDocument={async (docId) => {
+            try {
+              await dispatch(deleteDocument(docId)).unwrap();
+              // Refresh documents after delete
+              if (selectedBusinessId && selectedBusinessId !== "all") {
+                dispatch(fetchAllDocuments({ business: selectedBusinessId }));
+              } else {
+                dispatch(fetchAllDocuments({}));
+              }
+            } catch (err) {
+              alert(
+                t("messages.deleteFailed") ||
+                  "Failed to delete document. Please try again."
               );
             }
           }}

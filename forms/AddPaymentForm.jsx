@@ -204,7 +204,7 @@ export function AddPaymentForm({ onSuccess, onCancel, businessId = null }) {
         />
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-6">
+        <div className="flex gap-3 pt-6 mt-4">
           {onCancel && (
             <Button
               type="button"

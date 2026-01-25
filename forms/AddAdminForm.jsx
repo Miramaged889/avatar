@@ -197,19 +197,6 @@ export function AddAdminForm({ onSuccess, onCancel, businessId = null }) {
               {t("modals.addAdminDescription") ||
                 "Fill the information below to add a new admin"}
             </p>
-            {maxAdmins !== null && (
-              <div className="mt-3 flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span className="text-gray-600">
-                  {t("admin.maxAdminsInfo", {
-                    max: maxAdmins,
-                    current: currentAdminsCount,
-                    remaining: remainingAdmins,
-                  }) ||
-                    `Maximum: ${maxAdmins} admins | Current: ${currentAdminsCount} | Remaining: ${remainingAdmins}`}
-                </span>
-              </div>
-            )}
           </div>
           {onCancel && (
             <button
@@ -300,25 +287,9 @@ export function AddAdminForm({ onSuccess, onCancel, businessId = null }) {
           </div>
         )}
 
-        {/* Info card showing max admins limit */}
-        {maxAdmins !== null && canAddAdmin && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-sm text-blue-800">
-              <Users className="h-4 w-4" />
-              <span>
-                {t("admin.adminsLimitInfo", {
-                  max: maxAdmins,
-                  current: currentAdminsCount,
-                  remaining: remainingAdmins,
-                }) ||
-                  `Admin Limit: ${currentAdminsCount}/${maxAdmins} (${remainingAdmins} remaining)`}
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-6">
+        <div className="flex gap-3 pt-6 mt-4">
           {onCancel && (
             <Button
               type="button"
