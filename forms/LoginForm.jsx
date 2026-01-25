@@ -243,20 +243,6 @@ export function LoginForm() {
             )}
           </button>
         </div>
-        {/* Forgot Password Link */}
-        <div
-          className={cn("w-full flex", isRTL ? "justify-start" : "justify-end")}
-        >
-          <Link
-            href="/forgot-password"
-            className={cn(
-              "text-l text-gray-500 hover:text-primary-dark transition-colors",
-              isRTL && "text-right"
-            )}
-          >
-            {t("messages.forgotPassword")}
-          </Link>
-        </div>
       </div>
 
       {/* Login Button */}
