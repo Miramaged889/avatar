@@ -52,7 +52,7 @@ export function Topbar({ onMenuClick }) {
           <div
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-primary-light",
-              isRTL && "flex-row-reverse"
+              isRTL && "flex-row"
             )}
           >
             <div
@@ -66,7 +66,12 @@ export function Topbar({ onMenuClick }) {
                 {t("topbar.superAdministrator")}
               </p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-600 text-white font-semibold">
+            <div
+              className={cn(
+                "flex flex-row h-10 w-10 items-center justify-center rounded-full bg-gray-600 text-white font-semibold",
+                isRTL && "order-first"
+              )}
+            >
               A
             </div>
           </div>

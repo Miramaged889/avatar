@@ -377,6 +377,8 @@
     "passwordsDoNotMatch": "New password and confirmation do not match",
     "passwordUpdated": "Password updated successfully",
     "passwordUpdateFailed": "Failed to update password",
+    "profileUpdated": "Profile updated successfully",
+    "profileUpdateFailed": "Failed to update profile",
     "maxReached": "Limit reached",
     "businessNotFound": "Business not found",
     "businessRequired": "Business information is missing. Please refresh and try again."

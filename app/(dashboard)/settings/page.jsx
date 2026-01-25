@@ -39,6 +39,7 @@ import { cn } from "../../../components/utils/cn";
 import {
   changeSuperuserPassword,
   getSuperuserMe,
+  updateSuperuserMe,
 } from "../../../lib/api/authApi";
 import {
   Avatar,
@@ -53,6 +54,7 @@ export default function SettingsPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const [settings, setSettings] = useState({
     // Profile
@@ -61,6 +63,7 @@ export default function SettingsPage() {
     username: "",
     email: "",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
+    profileImage: null, // For file upload
 
     // Security
     currentPassword: "",
@@ -80,6 +83,121 @@ export default function SettingsPage() {
   const handleSave = (section) => {
     console.log(`Saving ${section} settings:`, settings);
     // Add save logic here
+  };
+
+  const handleProfileSave = async () => {
+    if (isSavingProfile) {
+      return;
+    }
+
+    if (!settings.username || !settings.email) {
+      alert(
+        t("messages.fillRequiredFields") || "Please fill in all required fields"
+      );
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      // Prepare form data for file upload if profile image is selected
+      const formData = new FormData();
+      formData.append("first_name", settings.firstName || "");
+      formData.append("last_name", settings.lastName || "");
+      formData.append("username", settings.username);
+      formData.append("email", settings.email);
+
+      // Add profile image if a new file is selected
+      if (settings.profileImage instanceof File) {
+        formData.append("profile_image", settings.profileImage);
+      }
+
+      const result = await updateSuperuserMe(formData);
+
+      if (result.success) {
+        const data = result.data || {};
+        setSettings((prev) => ({
+          ...prev,
+          firstName: data.first_name ?? prev.firstName,
+          lastName: data.last_name ?? prev.lastName,
+          username: data.username ?? prev.username,
+          email: data.email ?? prev.email,
+          avatar: data.profile_image || prev.avatar,
+          profileImage: null, // Reset file input
+        }));
+        alert(
+          t("messages.profileUpdated") || "Profile updated successfully"
+        );
+        // Reload account info to get latest data
+        const refreshResult = await getSuperuserMe();
+        if (refreshResult.success) {
+          const refreshData = refreshResult.data || {};
+          const derivedName =
+            [refreshData.first_name, refreshData.last_name]
+              .filter(Boolean)
+              .join(" ") ||
+            refreshData.username ||
+            "Admin";
+          setSettings((prev) => ({
+            ...prev,
+            firstName: refreshData.first_name || "",
+            lastName: refreshData.last_name || "",
+            username: refreshData.username || "",
+            email: refreshData.email || "",
+            avatar:
+              refreshData.profile_image ||
+              prev.avatar ||
+              `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+                derivedName
+              )}`,
+          }));
+        }
+        return;
+      }
+
+      const err = result.error;
+      let errorMessage =
+        t("messages.profileUpdateFailed") || "Failed to update profile";
+
+      if (err?.username) {
+        errorMessage = Array.isArray(err.username)
+          ? err.username.join(", ")
+          : err.username;
+      } else if (err?.email) {
+        errorMessage = Array.isArray(err.email)
+          ? err.email.join(", ")
+          : err.email;
+      } else if (err?.first_name) {
+        errorMessage = Array.isArray(err.first_name)
+          ? err.first_name.join(", ")
+          : err.first_name;
+      } else if (err?.last_name) {
+        errorMessage = Array.isArray(err.last_name)
+          ? err.last_name.join(", ")
+          : err.last_name;
+      } else if (err?.profile_image) {
+        errorMessage = Array.isArray(err.profile_image)
+          ? err.profile_image.join(", ")
+          : err.profile_image;
+      } else if (err?.detail) {
+        errorMessage =
+          typeof err.detail === "string"
+            ? err.detail
+            : Array.isArray(err.detail)
+            ? err.detail.join(", ")
+            : JSON.stringify(err.detail);
+      } else if (typeof err === "string") {
+        errorMessage = err;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      alert(errorMessage);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert(t("messages.profileUpdateFailed") || "Failed to update profile");
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   useEffect(() => {
@@ -127,6 +245,7 @@ export default function SettingsPage() {
         dateJoined: data.date_joined || null,
         lastLogin: data.last_login || null,
         avatar:
+          data.profile_image ||
           prev.avatar ||
           `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
             derivedName
@@ -255,6 +374,8 @@ export default function SettingsPage() {
         alert("File size must be less than 2MB");
         return;
       }
+      // Store the file for upload
+      handleChange("profileImage", file);
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -348,21 +469,20 @@ export default function SettingsPage() {
                   name="firstName"
                   value={settings.firstName}
                   onChange={(e) => handleChange("firstName", e.target.value)}
-                  disabled
+                  required
                 />
                 <TextInput
                   label={t("settings.profile.lastName")}
                   name="lastName"
                   value={settings.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  disabled
                 />
                 <TextInput
                   label={t("settings.profile.username")}
                   name="username"
                   value={settings.username}
                   onChange={(e) => handleChange("username", e.target.value)}
-                  disabled
+                  required
                 />
                 <TextInput
                   label={t("settings.profile.emailAddress")}
@@ -370,8 +490,26 @@ export default function SettingsPage() {
                   type="email"
                   value={settings.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  disabled
+                  required
                 />
+              </div>
+
+              <div
+                className={cn(
+                  "flex justify-end pt-4",
+                  isRTL && "justify-start"
+                )}
+              >
+                <Button
+                  onClick={handleProfileSave}
+                  className="flex items-center gap-2"
+                  disabled={isSavingProfile}
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingProfile
+                    ? t("buttons.saving") || "Saving..."
+                    : t("settings.profile.saveChanges")}
+                </Button>
               </div>
             </CardContent>
           </Card>

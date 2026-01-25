@@ -376,6 +376,8 @@
     "passwordsDoNotMatch": "كلمة المرور الجديدة وتأكيدها غير متطابقين",
     "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
     "passwordUpdateFailed": "فشل تحديث كلمة المرور",
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "profileUpdateFailed": "فشل تحديث الملف الشخصي",
     "maxReached": "تم الوصول إلى الحد الأقصى",
     "businessNotFound": "لم يتم العثور على العمل",
     "businessRequired": "معلومات العمل مفقودة. يرجى تحديث الصفحة والمحاولة مرة أخرى."
