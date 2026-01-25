@@ -20,19 +20,11 @@ import {
 } from "../../../components/shadcn/SelectWrapper";
 import {
   User,
-  Lock,
-  Bell,
   Globe,
   Save,
-  Mail,
-  Phone,
-  Building,
   Shield,
-  Key,
   Eye,
   EyeOff,
-  Download,
-  Trash2,
   AlertCircle,
   X,
 } from "lucide-react";
