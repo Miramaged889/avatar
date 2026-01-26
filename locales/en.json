@@ -50,7 +50,8 @@
     "next": "Next",
     "previous": "Previous",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "edit": "Edit"
   },
   "labels": {
     "email": "EMAIL ADDRESS",
@@ -95,7 +96,9 @@
     "fullName": "Full Name",
     "active": "Active",
     "inactive": "Inactive",
-    "required": "Required"
+    "required": "Required",
+    "logo": "Business Logo",
+    "removeLogo": "Remove Logo"
   },
   "placeholders": {
     "email": "Enter your email address",
@@ -382,6 +385,9 @@
     "maxAdminsReachedDetails": "You have reached the limit of {{max}} admins. Current count: {{current}}/{{max}}",
     "passwordMinLength": "Password must be at least 6 characters",
     "passwordsDoNotMatch": "New password and confirmation do not match",
+    "logoTooLarge": "Logo file size must be less than 5MB",
+    "invalidLogoType": "Invalid file type. Only PNG, JPEG, WEBP, and GIF are allowed",
+    "logoRequirements": "PNG, JPEG, WEBP, GIF (max 5MB)",
     "passwordUpdated": "Password updated successfully",
     "passwordUpdateFailed": "Failed to update password",
     "profileUpdated": "Profile updated successfully",

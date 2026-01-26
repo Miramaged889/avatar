@@ -59,6 +59,10 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
     max_admins: 10,
   });
 
+  // Logo file state
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+
   // Clients form data (array for multiple clients)
   const [clientsData, setClientsData] = useState([
     { name: "", email: "", phone: "" },
@@ -118,6 +122,10 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
         max_admins: currentBusiness.max_admins || 10,
       });
       setMaxAdmins(currentBusiness.max_admins || null);
+      // Set logo preview if logo exists
+      if (currentBusiness.logo) {
+        setLogoPreview(currentBusiness.logo);
+      }
     }
   }, [businessId, currentBusiness]);
 
@@ -227,6 +235,50 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
 
   const handleBusinessChange = (field, value) => {
     setBusinessData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setLogoFile(null);
+      setLogoPreview(null);
+      return;
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      alert(t("messages.logoTooLarge") || "Logo file size must be less than 5MB");
+      e.target.value = "";
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      alert(
+        t("messages.invalidLogoType") ||
+          "Invalid file type. Only PNG, JPEG, WEBP, and GIF are allowed"
+      );
+      e.target.value = "";
+      return;
+    }
+
+    setLogoFile(file);
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    // Reset file input
+    const fileInput = document.getElementById("logo-upload");
+    if (fileInput) fileInput.value = "";
   };
 
   const handleClientChange = (index, field, value) => {
@@ -339,8 +391,22 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
       // If creating, save business first, then move to next step
       setIsSubmitting(true);
       try {
+        // Prepare FormData if logo is present
+        let submitData;
+        if (logoFile) {
+          submitData = new FormData();
+          Object.keys(businessData).forEach((key) => {
+            if (businessData[key] !== null && businessData[key] !== undefined && businessData[key] !== "") {
+              submitData.append(key, businessData[key]);
+            }
+          });
+          submitData.append("logo", logoFile);
+        } else {
+          submitData = businessData;
+        }
+
         // Create the business
-        const createResult = await dispatch(addBusiness(businessData)).unwrap();
+        const createResult = await dispatch(addBusiness(submitData)).unwrap();
 
         // Check if API response includes the id
         let businessId = null;
@@ -493,56 +559,80 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
       try {
         // Prepare data - API requires at least name_en
         // Send all fields that have values
-        const submitData = {
-          name_en: businessData.name_en, // Required
-          ...(businessData.name_ar !== undefined &&
-            businessData.name_ar !== null &&
-            businessData.name_ar !== "" && { name_ar: businessData.name_ar }),
-          ...(businessData.legal_name_en !== undefined &&
-            businessData.legal_name_en !== null &&
-            businessData.legal_name_en !== "" && {
-              legal_name_en: businessData.legal_name_en,
-            }),
-          ...(businessData.legal_name_ar !== undefined &&
-            businessData.legal_name_ar !== null &&
-            businessData.legal_name_ar !== "" && {
-              legal_name_ar: businessData.legal_name_ar,
-            }),
-          ...(businessData.tax_number !== undefined &&
-            businessData.tax_number !== null &&
-            businessData.tax_number !== "" && {
-              tax_number: businessData.tax_number,
-            }),
-          ...(businessData.commercial_register_number !== undefined &&
-            businessData.commercial_register_number !== null &&
-            businessData.commercial_register_number !== "" && {
-              commercial_register_number:
-                businessData.commercial_register_number,
-            }),
-          ...(businessData.domain_url !== undefined &&
-            businessData.domain_url !== null &&
-            businessData.domain_url !== "" && {
-              domain_url: businessData.domain_url,
-            }),
-          ...(businessData.country !== undefined &&
-            businessData.country !== null &&
-            businessData.country !== "" && { country: businessData.country }),
-          ...(businessData.city !== undefined &&
-            businessData.city !== null &&
-            businessData.city !== "" && { city: businessData.city }),
-          ...(businessData.address !== undefined &&
-            businessData.address !== null &&
-            businessData.address !== "" && { address: businessData.address }),
-          ...(businessData.category !== undefined &&
-            businessData.category !== null &&
-            businessData.category !== "" && {
-              category: businessData.category,
-            }),
-          ...(businessData.max_admins !== undefined &&
-            businessData.max_admins !== null && {
-              max_admins: businessData.max_admins,
-            }),
-        };
+        let submitData;
+        
+        if (logoFile) {
+          // Use FormData if logo file is present
+          submitData = new FormData();
+          submitData.append("name_en", businessData.name_en);
+          
+          if (businessData.name_ar) submitData.append("name_ar", businessData.name_ar);
+          if (businessData.legal_name_en) submitData.append("legal_name_en", businessData.legal_name_en);
+          if (businessData.legal_name_ar) submitData.append("legal_name_ar", businessData.legal_name_ar);
+          if (businessData.tax_number) submitData.append("tax_number", businessData.tax_number);
+          if (businessData.commercial_register_number) submitData.append("commercial_register_number", businessData.commercial_register_number);
+          if (businessData.domain_url) submitData.append("domain_url", businessData.domain_url);
+          if (businessData.country) submitData.append("country", businessData.country);
+          if (businessData.city) submitData.append("city", businessData.city);
+          if (businessData.address) submitData.append("address", businessData.address);
+          if (businessData.category) submitData.append("category", businessData.category);
+          if (businessData.max_admins !== null && businessData.max_admins !== undefined) {
+            submitData.append("max_admins", businessData.max_admins);
+          }
+          submitData.append("logo", logoFile);
+        } else {
+          // Use JSON if no logo file
+          submitData = {
+            name_en: businessData.name_en, // Required
+            ...(businessData.name_ar !== undefined &&
+              businessData.name_ar !== null &&
+              businessData.name_ar !== "" && { name_ar: businessData.name_ar }),
+            ...(businessData.legal_name_en !== undefined &&
+              businessData.legal_name_en !== null &&
+              businessData.legal_name_en !== "" && {
+                legal_name_en: businessData.legal_name_en,
+              }),
+            ...(businessData.legal_name_ar !== undefined &&
+              businessData.legal_name_ar !== null &&
+              businessData.legal_name_ar !== "" && {
+                legal_name_ar: businessData.legal_name_ar,
+              }),
+            ...(businessData.tax_number !== undefined &&
+              businessData.tax_number !== null &&
+              businessData.tax_number !== "" && {
+                tax_number: businessData.tax_number,
+              }),
+            ...(businessData.commercial_register_number !== undefined &&
+              businessData.commercial_register_number !== null &&
+              businessData.commercial_register_number !== "" && {
+                commercial_register_number:
+                  businessData.commercial_register_number,
+              }),
+            ...(businessData.domain_url !== undefined &&
+              businessData.domain_url !== null &&
+              businessData.domain_url !== "" && {
+                domain_url: businessData.domain_url,
+              }),
+            ...(businessData.country !== undefined &&
+              businessData.country !== null &&
+              businessData.country !== "" && { country: businessData.country }),
+            ...(businessData.city !== undefined &&
+              businessData.city !== null &&
+              businessData.city !== "" && { city: businessData.city }),
+            ...(businessData.address !== undefined &&
+              businessData.address !== null &&
+              businessData.address !== "" && { address: businessData.address }),
+            ...(businessData.category !== undefined &&
+              businessData.category !== null &&
+              businessData.category !== "" && {
+                category: businessData.category,
+              }),
+            ...(businessData.max_admins !== undefined &&
+              businessData.max_admins !== null && {
+                max_admins: businessData.max_admins,
+              }),
+          };
+        }
 
         const result = await dispatch(
           editBusiness({ businessId, businessData: submitData })
@@ -938,6 +1028,54 @@ export function AddBusinessForm({ businessId = null, onSuccess, onCancel }) {
                       required
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Logo Upload */}
+              <div className="space-y-2 pt-2">
+                <label
+                  htmlFor="logo-upload"
+                  className="block text-sm font-medium text-gray-700 text-left"
+                >
+                  {t("labels.logo") || "Business Logo"}{" "}
+                  <span className="text-gray-400 text-xs font-normal">
+                    ({t("labels.optional") || "Optional"})
+                  </span>
+                </label>
+                <div className="flex items-start gap-4">
+                  <div className="flex-1">
+                    <input
+                      id="logo-upload"
+                      name="logo"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={handleLogoChange}
+                      className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-dark file:text-white hover:file:bg-primary-DEFAULT cursor-pointer"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      {t("messages.logoRequirements") ||
+                        "PNG, JPEG, WEBP, GIF (max 5MB)"}
+                    </p>
+                  </div>
+                  {logoPreview && (
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-lg border-2 border-gray-300 overflow-hidden">
+                        <img
+                          src={logoPreview}
+                          alt="Logo preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                        aria-label={t("buttons.removeLogo") || "Remove logo"}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

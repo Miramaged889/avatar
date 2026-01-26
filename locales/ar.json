@@ -49,6 +49,7 @@
     "addAdmin": "إضافة مشرف",
     "next": "التالي",
     "previous": "السابق",
+    "edit": "تعديل",
     "close": "إغلاق",
     "back": "رجوع"
   },
@@ -94,7 +95,9 @@
     "fullName": "الاسم الكامل",
     "active": "نشط",
     "inactive": "غير نشط",
-    "required": "مطلوب"
+    "required": "مطلوب",
+    "logo": "شعار العمل",
+    "removeLogo": "إزالة الشعار"
   },
   "placeholders": {
     "email": "ادخل عنوان البريد الإلكتروني",
@@ -382,6 +385,9 @@
     "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
     "passwordsDoNotMatch": "كلمة المرور الجديدة وتأكيدها غير متطابقين",
     "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
+    "logoTooLarge": "يجب أن يكون حجم ملف الشعار أقل من 5 ميجابايت",
+    "invalidLogoType": "نوع ملف غير صالح. يُسمح فقط بـ PNG و JPEG و WEBP و GIF",
+    "logoRequirements": "PNG، JPEG، WEBP، GIF (حد أقصى 5 ميجابايت)",
     "passwordUpdateFailed": "فشل تحديث كلمة المرور",
     "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
     "profileUpdateFailed": "فشل تحديث الملف الشخصي",

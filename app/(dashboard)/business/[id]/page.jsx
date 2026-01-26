@@ -6,7 +6,7 @@ import { useLocale } from "../../../../components/utils/useLocale";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "../../../../components/shadcn/ButtonWrapper";
 import { Badge } from "../../../../components/shadcn/BadgeWrapper";
-import { X, Plus, Edit, Trash2, AlertCircle, CheckCircle2, Image, ArrowLeft } from "lucide-react";
+import { X, Plus, Edit, Trash2, AlertCircle, CheckCircle2, Image, ArrowLeft, ArrowRight } from "lucide-react";
 import { getAllClients } from "../../../../lib/api/clientApi";
 import { getAllAdmins } from "../../../../lib/api/adminApi";
 import { getAllPayments } from "../../../../lib/api/paymentApi";
@@ -22,6 +22,7 @@ import { AddAdminForm } from "../../../../forms/AddAdminForm";
 import { EditAdminForm } from "../../../../forms/EditAdminForm";
 import { AddPaymentForm } from "../../../../forms/AddPaymentForm";
 import { EditPaymentForm } from "../../../../forms/EditPaymentForm";
+import { AddBusinessForm } from "../../../../forms/AddBusinessForm";
 import { removePayment } from "../../../../lib/store/slices/paymentSlice";
 import { fetchBusinessDetails } from "../../../../lib/store/slices/businessSlice";
 import {
@@ -57,6 +58,7 @@ export default function ViewBusinessPage() {
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [tempSelectedAvatarId, setTempSelectedAvatarId] = useState(null);
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+  const [isEditBusinessModalOpen, setIsEditBusinessModalOpen] = useState(false);
 
   // Fetch business details when businessId changes
   useEffect(() => {
@@ -403,6 +405,22 @@ export default function ViewBusinessPage() {
     }
   };
 
+  // Handle open edit business modal
+  const handleOpenEditBusinessModal = () => {
+    setIsEditBusinessModalOpen(true);
+  };
+
+  // Handle close edit business modal
+  const handleCloseEditBusinessModal = () => {
+    setIsEditBusinessModalOpen(false);
+  };
+
+  // Handle business form success
+  const handleBusinessSuccess = () => {
+    dispatch(fetchBusinessDetails(businessId)); // Refresh business details
+    setIsEditBusinessModalOpen(false);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     try {
@@ -441,29 +459,38 @@ export default function ViewBusinessPage() {
       {/* Header with Back Button */}
       <div
         className={cn(
-          "flex items-center justify-between",
+          "flex items-center w-full justify-between mb-4 flex-row-reverse",
           isRTL && "flex-row-reverse"
         )}
       >
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push("/business")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("buttons.back") || "Back"}
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {t("modals.viewBusiness") || "View Business Details"}
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              {t("modals.viewBusinessDescription") ||
-                "View detailed information about this business"}
-            </p>
-          </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push("/business")}
+          className={cn("flex items-center gap-2", isRTL && "flex-row-reverse")}
+        >
+          {isRTL ? (
+              <>
+                <ArrowRight className="h-4 w-4 rotate-180" />
+              {t("buttons.back") || "Back"}
+              
+            </>
+          ) : (
+            <>
+              
+                  {t("buttons.back") || "Back"}
+                  <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+        <div className={cn(isRTL ? "text-left" : "text-right")}>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {t("modals.viewBusiness") || "View Business Details"}
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            {t("modals.viewBusinessDescription") ||
+              "View detailed information about this business"}
+          </p>
         </div>
       </div>
       </div>
@@ -564,9 +591,41 @@ export default function ViewBusinessPage() {
 
           {/* Business Information Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              {t("business.basicInfo") || "Basic Information"}
-            </h3>
+            <div
+              className={cn(
+                "flex items-center justify-between border-b pb-2",
+                isRTL && "flex-row"
+              )}
+            >
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t("business.basicInfo") || "Basic Information"}
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenEditBusinessModal}
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                {t("buttons.edit") || "Edit"}
+              </Button>
+            </div>
+
+            {/* Logo Display */}
+            {currentBusiness.logo && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-500 mb-2">
+                  {t("labels.logo") || "Business Logo"}
+                </label>
+                <div className="inline-block p-2 border-2 border-gray-200 rounded-lg bg-gray-50">
+                  <img
+                    src={currentBusiness.logo}
+                    alt={currentBusiness.name_en || "Business logo"}
+                    className="h-24 w-24 object-contain rounded"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Name (English) */}
@@ -1195,6 +1254,23 @@ export default function ViewBusinessPage() {
               businessId={businessId} // Pass businessId to pre-fill the form
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Business Modal */}
+      <Dialog open={isEditBusinessModalOpen} onOpenChange={handleCloseEditBusinessModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">
+            {t("modals.editBusiness") || "Edit Business"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("modals.editBusinessDescription") || "Update business information"}
+          </DialogDescription>
+          <AddBusinessForm
+            businessId={businessId}
+            onSuccess={handleBusinessSuccess}
+            onCancel={handleCloseEditBusinessModal}
+          />
         </DialogContent>
       </Dialog>
 
